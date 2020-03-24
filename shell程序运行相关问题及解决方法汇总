@@ -1,0 +1,15 @@
+######################## miniconda3安装的hisat2运行报错 ########################
+
+Traceback (most recent call last):
+  File "/home/dell/miniconda3/envs/rna-seq/bin/hisat2_read_statistics.py", line 210, in <module>
+    reads_stat(args.read_file, args.read_count)
+  File "/home/dell/miniconda3/envs/rna-seq/bin/hisat2_read_statistics.py", line 168, in reads_stat
+    for id, seq in fstream:
+  File "/home/dell/miniconda3/envs/rna-seq/bin/hisat2_read_statistics.py", line 44, in parser_FQ
+    if line[0] == '@':
+IndexError: index out of range
+
+不使用conda环境配置下的hisat2做比对不会报错
+类似问题：https://www.biostars.org/p/427648/ 
+
+解决方法：？？？？？？？
