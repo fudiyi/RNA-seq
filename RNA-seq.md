@@ -4,9 +4,9 @@
 
 
 
-## 数据：MAC3A/B,SKIP
+## 数据：M,S
 
-### 类型：paired, 150x, fr-firststrand
+### 类型：paired, 150bp, 10×， fr-firststrand(链特异性建库)
 
 `rawdata: Col-1-0_368368_all.R1.fastq.gz;Col-1-0_368368_all.R2.fastq.gz`
 
@@ -21,7 +21,6 @@ fastqc /data/FDY_analysis/RNA_seq/FDY/mac3ab/rawdata/*.fastq.gz -o fastqc
 multiqc *fastqc.zip --ignore *.html
 ```
 
-![1578378576(1)](D:\RNA-Seq-fdy\fastqc\1578378576(1).png)![1578378509(1)](D:\RNA-Seq-fdy\fastqc\1578378509(1).png)
 
 ## 2. 比对
 
@@ -46,12 +45,13 @@ hisat2-build -p 10 Zea_mays.AGPv4.dna.toplevel.fa genome
 ```shell
 wkpath1=/data/FDY_analysis/RNA_seq/FDY/mac3ab/rawdata/cleandata #设置工作路径
 wkpath2=/data/FDY_analysis/RNA_seq/FDY/mac3ab/rawdata/hisat2_results_for_cufflink
-for i in $(ls ${wkpath1}/*.R1.fastq.gz) 
+for i in $(ls ${wkpath1}/*.R1.fastq.gz) # $(your command) 用法等于 `your command`
 do
     sample_name=`basename $i|sed s/.R1.*//g` #取文件名（sed 用于将 /.R1.*/ 前后的字符替换为空格）
+    或 sample_name=`basename $i .R1.fastq.gz`
     hisat2 -p 12 \ #线程
-    --dta-cufflinks \ #设置此参数用于后续分析结合cfflinks
-    --rna-strandness RF \ #链特异性
+    --dta-cufflinks \ #设置此参数用于后续分析结合cfflinks,若在拼接转录本时使用stringtie，则只加 --dta
+    --rna-strandness RF \ #链特异性，若非此建库方式，则不使用此命令！！！
     -x /data/FDY_analysis/Arabidposis_index_hisat2/genome \ #hisat2-build 构建的索引文件
     -1 ${wkpath1}/${sample_name}.R1.fastq.gz \
     -2 ${wkpath1}/${sample_name}.R2.fastq.gz \
@@ -70,7 +70,7 @@ done
 samtools view *.bam|less
 ```
 
-![bam](D:\RNA-Seq-fdy\markdown_file\bam.png)
+
 
 
 
