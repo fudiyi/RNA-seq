@@ -55,10 +55,21 @@ echo ${file%%.*}
 *是用来匹配不要的字符，也就是想要去掉的那部分
 ```
 
-#### awk
+#### awk,sed,grep
 
 ```shell
-awk -F ''
+# 同时匹配几个条件，如搜索txt文件中同时包含col-0，col-3的行
+
+grep col-0 file.txt | grep col-3
+grep -E 'col-0.*col-3' file.txt
+sed -n '/col-0/{/col-3/p}' file.txt
+awk '/col-0/&&/col-3/{ print $0 }' file.txt
+
+# 匹配ABC 或 abc
+
+sed -n '/\(ABC\|abc\)/p'
+awk '/ABC/||/abc/{ print $0 }'
+grep -E '(ABC|abc)' 或 egrep 'ABC|abc'
 ```
 
 
