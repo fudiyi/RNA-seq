@@ -1,0 +1,30 @@
+################################### hisat2+stringtie 总体思路 ##########################
+#####官方说明十分详细：http://ccb.jhu.edu/software/stringtie/index.shtml?t=manual
+#####该流程大致思路和 RNA-seq.md 中差不多，区别比较大的是后续定量及差异分析
+###质控
+fastqc *.fq.gz
+
+###比对，与 cufflink 做拼接的唯一差别就是 --dta-cufflinks 该命令
+hisat2 -p 12 --dta -x /data/FDY_analysis/Arabidposis_index/genome -1 Sample_col_0h_1.R1.fq.gz -2 Sample_col_0h_1.R2.fq.gz -S ./hisat2_results/col_0h_1.sam
+
+###转 sam 文件为 bam，并排序
+samtools sort -@ 12 -o /data/RNA-Seq/YH/rawdata/hisat2_results/col_0h_1.bam /data/RNA-Seq/YH/rawdata/hisat2_results/col_0h_1.sam
+
+###对 bam 文件进行转录本拼接 （如果对新的转录本不感兴趣这步完全可以不做）
+stringtie /data/RNA-Seq/YH/rawdata/hisat2_results/col_0h_1.bam -p 12 -G /data/FDY_analysis/Ara_gff_file/TAIR10.GFF3.genes.gff -o col_0h_1_stringtie.gtf -l col_0h_1
+
+###合并拼接之后的转录本为 merged.gff，mergelist.txt 包含拼接后单个 gtf 文件的路径
+stringtie --merge -p 12 -G /data/FDY_analysis/Ara_gff_file/TAIR10.GFF3.genes.gff -o stringtie_merged.gtf ./mergelist.txt
+
+###定量
+#方法1   使用 stringtie 内置命令，结合 prepDE.py
+
+stringtie -e -B -p 12 -G /data/RNA-Seq/YH/rawdata/stringtie_results/stringtie_merged.gtf -o ./ballgown/col_0h_${i}/col_0h_${i}.gtf /data/RNA-Seq/YH/rawdata/hisat2_results/col_0h_${i}.bam
+python prepDE.py
+
+###方法2   使用 featurecounts 直接对得到的 bam 文件定量
+/data/software/subread-2.0.0-Linux-x86_64/bin/featureCounts -T 16 -p -t exon -g Parent -a /data/FDY_analysis/Ara_gff_file/TAIR10.GFF3.genes.gff -o counts_exon.txt *.bam
+
+###差异分析
+
+DeSeq2 or edgR
