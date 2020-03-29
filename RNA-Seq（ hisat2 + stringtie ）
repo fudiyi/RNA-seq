@@ -31,7 +31,7 @@ DeSeq2 or edgR
 
 ################################################### RNA-Seq分析终极奥义 ###########################################
 
-```shell
+
 #!/usr/bin/env bash
 echo begin fastqc
 ls *.gz | while read id ;do fastqc $id ;done 
@@ -43,6 +43,7 @@ then
     for i in $(ls ${wkpath1}/*.R1.fastq.gz)
     do
         sample_name=`basename $i .R1.fastq.gz`
+        echo satart align ${sample_name}
         hisat2 -p 12 --dta-cufflinks -x /data/FDY_analysis/Arabidposis_index_hisat2/genome -1 ${wkpath1}/${sample_name}.R1.fastq.gz -2 ${wkpath1}/${sample_name}.R2.fastq.gz -S ${wkpath2}/results_bam/${sample_name}.hisat2.sam
         samtools sort -@ 12 -o ${wkpath2}/results_bam/${sample_name}.hisat2.bam ${wkpath2}/results_bam/${sample_name}.hisat2.sam
         echo ${sample_name} align and sort finished
@@ -57,4 +58,5 @@ else
 fi
 
 echo finish RNA-Seq analysis  
-```
+
+注：注意目录下已新建 hisat2_results_for_cufflink，results_bam 文件夹
