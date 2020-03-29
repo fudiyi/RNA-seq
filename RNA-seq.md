@@ -18,6 +18,7 @@
 
 ```shell
 fastqc /data/FDY_analysis/RNA_seq/FDY/mac3ab/rawdata/*.fastq.gz -o fastqc
+或 ls *.gz | while read id ;do fastqc $id ;done # while read 一次读取一行
 multiqc *fastqc.zip --ignore *.html
 ```
 
@@ -60,6 +61,7 @@ do
 done
 ```
 
+
 ### results
 
 `results: Col-1-0_368368_all.hisat2.bam`
@@ -70,8 +72,9 @@ done
 samtools view *.bam|less
 ```
 
-
-
+```shell
+ls *bam | while read id ;do (samtools flagstat -@ 10 $id > $(basename $id '.bam').flagstat) ;done  # flagstat 统计
+```
 
 
 ## 3. 使用IGV查看bam文件
