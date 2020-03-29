@@ -28,3 +28,33 @@ python prepDE.py
 ###差异分析
 
 DeSeq2 or edgR
+
+################################################### RNA-Seq分析终极奥义 ###########################################
+
+```shell
+#!/usr/bin/env bash
+echo begin fastqc
+ls *.gz | while read id ;do fastqc $id ;done 
+if [ $? -eq 0 ] #判断fastqc是否成功
+then
+    echo finish fastqc and start align.....
+    wkpath1=/data/FDY_analysis/RNA_seq/script_test
+    wkpath2=/data/FDY_analysis/RNA_seq/script_test/hisat2_results_for_cufflink
+    for i in $(ls ${wkpath1}/*.R1.fastq.gz)
+    do
+        sample_name=`basename $i .R1.fastq.gz`
+        hisat2 -p 12 --dta-cufflinks -x /data/FDY_analysis/Arabidposis_index_hisat2/genome -1 ${wkpath1}/${sample_name}.R1.fastq.gz -2 ${wkpath1}/${sample_name}.R2.fastq.gz -S ${wkpath2}/results_bam/${sample_name}.hisat2.sam
+        samtools sort -@ 12 -o ${wkpath2}/results_bam/${sample_name}.hisat2.bam ${wkpath2}/results_bam/${sample_name}.hisat2.sam
+        echo ${sample_name} align and sort finished
+    done
+
+    echo begin cuffdiff
+    cuffdiff -o diffout_all -p 12 -b /data/FDY_analysis/Arabidposis_index_hisat2/Arabidopsis_TAIR10_gene_JYX.fa -u /data/FDY_analysis/Ara_gff_file/TAIR10.GFF3.genes.gff Col-1-0_368368_all.hisat2.bam S-1-0_380380_all.hisat2.bam 
+    echo cuffdiff done
+
+else 
+    echo can not begin algin
+fi
+
+echo finish RNA-Seq analysis  
+```
