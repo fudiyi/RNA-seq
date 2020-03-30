@@ -1,0 +1,194 @@
+################################### hisat2+stringtie 总体思路 ##########################
+#####官方说明十分详细：http://ccb.jhu.edu/software/stringtie/index.shtml?t=manual
+#####该流程大致思路和 RNA-seq.md 中差不多，区别比较大的是后续定量及差异分析
+###质控
+fastqc *.fq.gz
+
+###比对，与 cufflink 做拼接的唯一差别就是 --dta-cufflinks 该命令
+hisat2 -p 12 --dta -x /data/FDY_analysis/Arabidposis_index/genome -1 Sample_col_0h_1.R1.fq.gz -2 Sample_col_0h_1.R2.fq.gz -S ./hisat2_results/col_0h_1.sam
+
+###转 sam 文件为 bam，并排序
+samtools sort -@ 12 -o /data/RNA-Seq/YH/rawdata/hisat2_results/col_0h_1.bam /data/RNA-Seq/YH/rawdata/hisat2_results/col_0h_1.sam
+
+###对 bam 文件进行转录本拼接 （如果对新的转录本不感兴趣这步完全可以不做）
+stringtie /data/RNA-Seq/YH/rawdata/hisat2_results/col_0h_1.bam -p 12 -G /data/FDY_analysis/Ara_gff_file/TAIR10.GFF3.genes.gff -o col_0h_1_stringtie.gtf -l col_0h_1
+
+###合并拼接之后的转录本为 merged.gff，mergelist.txt 包含拼接后单个 gtf 文件的路径
+stringtie --merge -p 12 -G /data/FDY_analysis/Ara_gff_file/TAIR10.GFF3.genes.gff -o stringtie_merged.gtf ./mergelist.txt
+
+###定量
+#方法1   使用 stringtie 内置命令，结合 prepDE.py
+
+stringtie -e -B -p 12 -G /data/RNA-Seq/YH/rawdata/stringtie_results/stringtie_merged.gtf -o ./ballgown/col_0h_${i}/col_0h_${i}.gtf /data/RNA-Seq/YH/rawdata/hisat2_results/col_0h_${i}.bam
+python prepDE.py
+
+###方法2   使用 featurecounts 直接对得到的 bam 文件定量
+/data/software/subread-2.0.0-Linux-x86_64/bin/featureCounts -T 16 -p -t exon -g Parent -a /data/FDY_analysis/Ara_gff_file/TAIR10.GFF3.genes.gff -o counts_exon.txt *.bam
+
+###差异分析
+
+DeSeq2 or edgR
+
+################################################### RNA-Seq分析终极奥义 ###########################################
+### hisat2 + cufflinks ###
+
+#!/usr/bin/env bash
+echo begin fastqc
+ls *.gz | while read id ;do fastqc $id ;done 
+if [ $? -eq 0 ] #判断fastqc是否成功
+then
+    echo finish fastqc and start align.....
+    wkpath1=/data/FDY_analysis/RNA_seq/script_test
+    wkpath2=/data/FDY_analysis/RNA_seq/script_test/hisat2_results_for_cufflink
+    for i in $(ls ${wkpath1}/*.R1.fastq.gz)
+    do
+        sample_name=`basename $i .R1.fastq.gz`
+        echo satart align ${sample_name}
+        hisat2 -p 12 --dta-cufflinks -x /data/FDY_analysis/Arabidposis_index_hisat2/genome -1 ${wkpath1}/${sample_name}.R1.fastq.gz -2 ${wkpath1}/${sample_name}.R2.fastq.gz -S ${wkpath2}/results_bam/${sample_name}.hisat2.sam
+        samtools sort -@ 12 -o ${wkpath2}/results_bam/${sample_name}.hisat2.bam ${wkpath2}/results_bam/${sample_name}.hisat2.sam
+        echo ${sample_name} align and sort finished
+    done
+
+    echo begin cuffdiff
+    cuffdiff -o diffout_all -p 12 -b /data/FDY_analysis/Arabidposis_index_hisat2/Arabidopsis_TAIR10_gene_JYX.fa -u /data/FDY_analysis/Ara_gff_file/TAIR10.GFF3.genes.gff Col-1-0_368368_all.hisat2.bam S-1-0_380380_all.hisat2.bam 
+    echo cuffdiff done
+
+else 
+    echo can not begin algin
+fi
+
+echo finish RNA-Seq analysis  
+
+注：注意目录下已新建 hisat2_results_for_cufflink，results_bam 文件夹
+
+
+### hisat2 + stringtie ###
+# 此脚本同时对四套 RNA-seq 数据进行了分析，除N7之外的三套是同一批下机数据，共用一个野生型，因此在比对和拼接转录本时可一起批量进行，但是在进行
+  转录本merge时需将三个不同突变体分开并分别进行定量
+
+#!/usr/bin/env bash
+#fdy -,-
+
+echo ------ set wkpth
+wkpath_N7=/data/RNA-Seq/YH/N7_hisat2_stringtie_ballgown
+wkpath_N7_results=/data/RNA-Seq/YH/N7_analysis_with_stringtie_again_for_comfirm/hisat2_results_for_stringtie
+wkpath_all3=/data/FDY_analysis/RNA_seq/YH_cbfs/cleandata
+wkpath_all3_results=/data/FDY_analysis/RNA_seq/YH_cbfs/cleandata/hisat2_results_for_stringtie
+
+echo ------ wkpath set done
+
+# if the wkpath doesn't exit, remember to create the wkpath dir such as the follow script: " mkdir -p ./hisat2_results_for_stringtie/results_bam/stringtie_gtf/{ballgown_cbf,ballgown_cpk,ballgown_EGTA} "
+
+############### N7 ###############
+
+echo ------ begin N7
+for i in $(ls ${wkpath_N7}/*.R1.fq.gz)
+do
+    sample_name=`basename $i .R1.fq.gz`
+    echo ------ start algin ${sample_name}
+    hisat2 -p 20 --dta -x /data/FDY_analysis/Arabidposis_index_hisat2/genome -1 ${wkpath_N7}/${sample_name}.R1.fq.gz -2 ${wkpath_N7}/${sample_name}.R2.fq.gz -S ${wkpath_N7_results}/results_bam/${sample_name}.hisat2.sam
+    samtools sort -@ 20 -o ${wkpath_N7_results}/results_bam/${sample_name}.hisat2.bam ${wkpath_N7_results}/results_bam/${sample_name}.hisat2.sam
+    rm -rf ${wkpath_N7_results}/results_bam/*.sam
+    echo ------ ${sample_name} algin and sort finished
+done
+
+echo ------- all sample algin finished and begin stringtie
+for i in `ls ${wkpath_N7_results}/results_bam/*.bam`
+do
+    sample_name=`basename $i .bam`
+    echo ------- start stringtie ${sample_name}
+    stringtie ${wkpath_N7_results}/results_bam/${sample_name}.bam -p 20 -G /data/FDY_analysis/Ara_gff_file/TAIR10.GFF3.genes.gff -o ${wkpath_N7_results}/results_bam/stringtie_gtf/${sample_name}_stringtie.gtf
+    echo ------ finish ${sample_name} pinjie
+done
+
+echo ------ pinjie finished
+echo ------ create a gtf list
+ls ${wkpath_N7_results}/results_bam/stringtie_gtf/*.gtf > ${wkpath_N7_results}/results_bam/stringtie_gtf/mergelist.txt
+echo ------ begin merge
+stringtie --merge -p 20 -G /data/FDY_analysis/Ara_gff_file/TAIR10.GFF3.genes.gff -o ${wkpath_N7_results}/results_bam/stringtie_gtf/stringtie_merged.gtf ${wkpath_N7_results}/results_bam/stringtie_gtf/mergelist.txt
+echo ------ merge done
+
+echo ------ begin quantify
+for i in `ls ${wkpath_N7_results}/results_bam/*.bam`
+do
+    sample_name=`basename $i .bam`
+    stringtie -e -B -p 20 -G ${wkpath_N7_results}/results_bam/stringtie_gtf/stringtie_merged.gtf -o ${wkpath_N7_results}/results_bam/stringtie_gtf/ballgown/${sample_name}/${sample_name}.gtf ${wkpath_N7_results}/results_bam/${sample_name}.bam
+done
+echo ------ quantify finished
+
+echo ------ done N7
+
+
+############## cbf/cpk/EGTA ###############
+
+echo ------ begin all3
+for i in $(ls ${wkpath_all3}/*.R1.fq.gz)
+do
+    sample_name=`basename $i .R1.fq.gz`
+    echo ------ start algin ${sample_name}
+    hisat2 -p 20 --dta -x /data/FDY_analysis/Arabidposis_index_hisat2/genome -1 ${wkpath_all3}/${sample_name}.R1.fq.gz -2 ${wkpath_all3}/${sample_name}.R2.fq.gz -S ${wkpath_all3_results}/results_bam/${sample_name}.hisat2.sam
+    samtools sort -@ 20 -o ${wkpath_all3_results}/results_bam/${sample_name}.hisat2.bam ${wkpath_all3_results}/results_bam/${sample_name}.hisat2.sam
+    rm -rf ${wkpath_all3_results}/results_bam/*.sam
+    echo ------ ${sample_name} algin and sort finished
+done
+
+echo ------- all sample algin finished and begin stringtie
+for i in `ls ${wkpath_all3_results}/results_bam/*.bam`
+do
+    sample_name=`basename $i .bam`
+    echo ------- start stringtie ${sample_name}
+    stringtie ${wkpath_all3_results}/results_bam/${sample_name}.bam -p 20 -G /data/FDY_analysis/Ara_gff_file/TAIR10.GFF3.genes.gff -o ${wkpath_all3_results}/results_bam/stringtie_gtf/${sample_name}_stringtie.gtf
+    echo ------ finish ${sample_name} pinjie
+done
+
+echo ------ pinjie finished
+echo ------ create a gtf list
+
+########### CBF #########
+echo ------ create a cbf gtf list
+ls ${wkpath_all3_results}/results_bam/stringtie_gtf/*.gtf |grep -E 'Col|cbfs' > ${wkpath_all3_results}/results_bam/stringtie_gtf/cbfs_mergelist.txt
+echo ------ begin cbf gtf merge
+stringtie --merge -p 20 -G /data/FDY_analysis/Ara_gff_file/TAIR10.GFF3.genes.gff -o ${wkpath_all3_results}/results_bam/stringtie_gtf/stringtie_merged_cbf.gtf ${wkpath_all3_results}/results_bam/stringtie_gtf/cbfs_mergelist.txt
+echo ------ cbf merge done
+
+echo ------ begin cbf quantify
+for i in `ls ${wkpath_all3_results}/results_bam/stringtie_gtf/*.gtf |grep -E 'Col|cbfs'`
+do
+    sample_name=`basename $i _stringtie.gtf`
+    stringtie -e -B -p 20 -G ${wkpath_all3_results}/results_bam/stringtie_gtf/stringtie_merged_cbf.gtf -o ${wkpath_all3_results}/results_bam/stringtie_gtf/ballgown_cbf/${sample_name}/${sample_name}.gtf ${wkpath_all3_results}/results_bam/${sample_name}.bam
+done
+echo ------ cbf quantify finished
+
+########### cpk #########
+echo ------ create a cpk gtf list
+ls ${wkpath_all3_results}/results_bam/stringtie_gtf/*.gtf |grep -E 'Col|cpk' > ${wkpath_all3_results}/results_bam/stringtie_gtf/cpk_mergelist.txt
+echo ------ begin cpk gtf merge
+stringtie --merge -p 20 -G /data/FDY_analysis/Ara_gff_file/TAIR10.GFF3.genes.gff -o ${wkpath_all3_results}/results_bam/stringtie_gtf/stringtie_merged_cpk.gtf ${wkpath_all3_results}/results_bam/stringtie_gtf/cpk_mergelist.txt
+echo ------ cpk merge done
+
+echo ------ begin cpk quantify
+for i in `ls ${wkpath_all3_results}/results_bam/stringtie_gtf/*.gtf |grep -E 'Col|cpk'`
+do
+    sample_name=`basename $i _stringtie.gtf`
+    stringtie -e -B -p 20 -G ${wkpath_all3_results}/results_bam/stringtie_gtf/stringtie_merged_cpk.gtf -o ${wkpath_all3_results}/results_bam/stringtie_gtf/ballgown_cpk/${sample_name}/${sample_name}.gtf ${wkpath_all3_results}/results_bam/${sample_name}.bam
+done
+echo ------ cpk quantify finished
+
+
+########### EGTA #########
+echo ------ create a EGTA gtf list
+ls ${wkpath_all3_results}/results_bam/stringtie_gtf/*.gtf |grep -E 'Col|EGTA' > ${wkpath_all3_results}/results_bam/stringtie_gtf/EGTA_mergelist.txt
+echo ------ begin EGTA gtf merge
+stringtie --merge -p 20 -G /data/FDY_analysis/Ara_gff_file/TAIR10.GFF3.genes.gff -o ${wkpath_all3_results}/results_bam/stringtie_gtf/stringtie_merged_EGTA.gtf ${wkpath_all3_results}/results_bam/stringtie_gtf/EGTA_mergelist.txt
+echo ------ EGTA merge done
+
+echo ------ begin EGTA quantify
+for i in `ls ${wkpath_all3_results}/results_bam/stringtie_gtf/*.gtf |grep -E 'Col|EGTA'`
+do
+    sample_name=`basename $i _stringtie.gtf`
+    stringtie -e -B -p 20 -G ${wkpath_all3_results}/results_bam/stringtie_gtf/stringtie_merged_EGTA.gtf -o ${wkpath_all3_results}/results_bam/stringtie_gtf/ballgown_EGTA/${sample_name}/${sample_name}.gtf ${wkpath_all3_results}/results_bam/${sample_name}.bam
+done
+echo ------ EGTA quantify finished
+
+echo ------ all data analysis finished
+echo ------ python prepDE.py should be used to count reads and combine DEseq2 to find DEGs
