@@ -13,3 +13,10 @@ IndexError: index out of range
 类似问题：https://www.biostars.org/p/427648/ 
 
 解决方法：？？？？？？？
+
+#################### conda 安装 DESeq2 报错 ########################
+
+ERROR conda.core.link:_execute(700): An error occurred while installing package 'bioconda::bioconductor-genomeinfodbdata-1.2.2-r36_0'.
+ValueError: unsupported format character 'T' (0x54) at index 682
+
+？？？？？？
