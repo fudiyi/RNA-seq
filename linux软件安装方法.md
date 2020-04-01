@@ -38,11 +38,27 @@ conda activate python2 #激活该环境
 conda deactivate #关闭环境
 vim ~/.condarc #有时候下载速度会很慢，更需改镜像
 
+# 更改 channels
+conda config --add channels conda-forge # Lowest priority
+conda config --add channels defaults
+conda config --add channels bioconda
+conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/
+conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/ # 清华通道, 最高优先级
+conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/
+conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/
+conda config --set show_channel_urls yes
+# 查看 channels
+conda config --get channels 
+
 #进行转录组分析时可设置一个专门的RNA-Seq环境变量
-conda install -n RNA-Seq
+conda create -n RNA-Seq python=2.7
 conda install -y hisat2 cutadapt star #在RNA-Seq环境下安装一系列分析所需软件
 
 conda install -n python2 -y cufflinks #当python环境不对时也可使用-n指定特定环境进行安装
+
+# 创建 R 环境
+conda install -c r r-essentials  # -c 指定下载通道，安装r及必备的一些包
+conda install -c https://conda.binstar.org/bokeh ggplot # 安装单个包
 ```
 
 
