@@ -70,6 +70,22 @@ awk '/col-0/&&/col-3/{ print $0 }' file.txt
 sed -n '/\(ABC\|abc\)/p'
 awk '/ABC/||/abc/{ print $0 }'
 grep -E '(ABC|abc)' 或 egrep 'ABC|abc'
+
+# 匹配ABC 或 ABD
+
+ grep AB[C,D] 
+
+# 删除 ABC
+
+grep -v -w ABC file.txt # -w 即 word，按单个词匹配
+
+# 将匹配内容的上、下几行输出
+
+-B => before，输出匹配内容之前的几行
+-A => after，输出匹配内容之后的几行
+-C => before & after, 输出匹配内容前后几行
+
+grep -B1 -w ABC file.txt # 会显示txt文件中匹配到ABC及其前一行内容
 ```
 
 
