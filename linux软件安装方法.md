@@ -59,6 +59,9 @@ conda install -n python2 -y cufflinks #当python环境不对时也可使用-n指
 # 创建 R 环境
 conda install -c r r-essentials  # -c 指定下载通道，安装r及必备的一些包
 conda install -c https://conda.binstar.org/bokeh ggplot # 安装单个包
+conda install -c bioconda bioconductor-deseq2  # 当不知道某个包是否存在于某个通道时可在相应通道查询，如：https://anaconda.org/
+
+注：R 包安装有时会说没有相应包，更改通道即可
 ```
 
 
