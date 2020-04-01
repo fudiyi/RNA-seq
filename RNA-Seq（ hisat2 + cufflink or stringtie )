@@ -160,6 +160,9 @@ do
 done
 echo ------ cbf quantify finished
 
+#### ERROR：运行完成后发现 ballgown_cbf 的文件夹中含有 cpk 及 EGTA 的 gtf 文件，原因为命令" ls ${wkpath_all3_results}/results_bam/stringtie_gtf/*.gtf |grep -E 'Col|cbfs' "的wkpath路径中包含cbf，
+     修改为 " ls ${wkpath_all3_results}/results_bam/stringtie_gtf/*.gtf |grep -E 'Col|cbfs_' "即可
+     
 ########### cpk #########
 echo ------ create a cpk gtf list
 ls ${wkpath_all3_results}/results_bam/stringtie_gtf/*.gtf |grep -E 'Col|cpk' > ${wkpath_all3_results}/results_bam/stringtie_gtf/cpk_mergelist.txt
