@@ -36,6 +36,10 @@ fq文件详解：https://support.illumina.com/bulletins/2016/04/fastq-files-expl
 ## 1. 质控
 在进行数据分析之前需要对下机数据进行质检，目的是为了判断数据是否达标，大部分返回的测序数据为Cleandata（已去接头），质量均不错
 
+主要判断依据：Perbase sequence quality  Q20过滤法：箱型图10%的线大于 Q=20  Q=-10*lg10(error P)
+
+注：Per base sequence content 前几个碱基测序时候因为状态调整会导致测序略有偏差
+
 ### fastqc（质控软件）
 reference：
 
