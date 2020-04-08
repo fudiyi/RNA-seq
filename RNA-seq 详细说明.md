@@ -21,7 +21,9 @@ C. 预测新的转录本：步骤 1(质控) + 2(比对) + 5(拼接转录本) + 6
 ### 数据类型：paired, 150bp, 10×， fr-firststrand(链特异性建库)
 
 注：1. 数据测序类型分为单端测序和双端测序（recommend）；2. 建库类型有普通建库和链特异性建库
+
 reference：
+
 1. https://www.illumina.com/science/technology/next-generation-sequencing/plan-experiments/paired-end-vs-single-read.html
 2. https://www.jianshu.com/p/a63595a41bed
 
@@ -36,6 +38,7 @@ fq文件详解：https://support.illumina.com/bulletins/2016/04/fastq-files-expl
 
 ### fastqc（质控软件）
 reference：
+
 fastqc： http://darlinglab.org/tutorials/fastqc/
 mulitiqc： https://multiqc.info/
 
@@ -349,7 +352,6 @@ head(annotation_col)
 bk = unique(c(seq(0,5, length=100)))
 ```
 
-<img src="D:\RNA-Seq-fdy\markdown_file\1578382811(1).png" alt="1578382811(1)" style="zoom: 67%;" />
 
 ```R
 ##################################### 火山图 ##################################
