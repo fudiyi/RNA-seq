@@ -56,6 +56,7 @@ reference： https://daehwankimlab.github.io/hisat2/manual/
 
 2.1	添加环境变量：（在首次安装软件之前需配置环境，包括fastqc）
 reference：
+
 https://www.jianshu.com/p/9c2bf27c3921
 http://blog.sciencenet.cn/home.php?mod=space&uid=118204&do=blog&id=1226040
 
@@ -115,6 +116,7 @@ ls *bam | while read id ;do (samtools flagstat -@ 10 $id > $(basename $id '.bam'
 ## 3. 使用IGV查看bam文件
 
 reference： http://software.broadinstitute.org/software/igv/
+
 bam文件在导入IGV前需进行排序及构建索引
 
 ```shell
