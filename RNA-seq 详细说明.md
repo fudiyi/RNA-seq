@@ -139,7 +139,7 @@ done
 
 数据为链特异性数据，因此在区分bam文件时需要区分正反链
 
-不同样本间比较需对wig文件进行归一化：--normalizeUsing (Possible choices: RPKM, CPM, BPM, RPGC, None)
+不同样本间比较需对wig文件进行标准化：--normalizeUsing (Possible choices: RPKM, CPM, BPM, RPGC, None)
 
 reference: https://mp.weixin.qq.com/s?__biz=MzIwODA1MzI4Mg==&mid=2456011255&idx=1&sn=c2d6c19150f2896a8d89fbf07e07522e&chksm=809f94bab7e81dacf31b62eb7159487b112dab496b97619686f01b54f1ce5133733dfa706948&scene=21#wechat_redirect
 
@@ -302,7 +302,7 @@ or
 
 ## 8. 差异分析
 
-差异分析前必看归一化问题
+差异分析前必看标准化问题
 
 reference：
 
