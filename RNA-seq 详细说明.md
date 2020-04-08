@@ -294,6 +294,13 @@ or
 
 ## 8. 差异分析
 
+差异分析前必看归一化问题
+
+reference：
+
+1. https://www.jianshu.com/p/cd2888fec66b
+2. https://www.jianshu.com/p/248228be3cf0
+
 ### 8.1	挑选差异基因
 
 若是cuffdiff结果，直接用 **gene.exp.diff** 文件筛选差异基因；若是featurecounts结果，使用DESeq2
