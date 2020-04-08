@@ -2,46 +2,77 @@
 
 # RNA-seq	procedure	for	Yanglab
 
+## 如果没有相关RNA-seq分析基础，请先参考以下两篇经典文章
 
+1. tophat + cufflink: https://www.ncbi.nlm.nih.gov/pubmed/22383036
+2. hisat2 + stringtie: https://www.ncbi.nlm.nih.gov/pubmed/?term=Transcript-level+expression+analysis+of+RNA-seq+experiments+with+HISAT%2C+StringTie+and+Ballgown
 
-## 数据：M,S
+注：所有本文用到的软件均在官网有详细说明
 
-### 类型：paired, 150bp, 10×， fr-firststrand(链特异性建库)
+根据自己需求：从以下方法选择一种即可
+A. 普通 RNA-Seq 分析：步骤 1(质控) + 2(比对) + 7(定量) + 8(差异分析)
+B. 可变剪接分析：步骤 1(质控) + 2(比对) + 10(可变剪接)
+C. 预测新的转录本：步骤 1(质控) + 2(比对) + 5(拼接转录本) + 6(合并转录本) + 7(定量) + 8(差异分析) + 9(预测转录本)
 
-`rawdata: Col-1-0_368368_all.R1.fastq.gz;Col-1-0_368368_all.R2.fastq.gz`
+## 数据样本：M,S,Col 此数据基本包括了所有转录本分析所需内容
+### 数据类型：paired, 150bp, 10×， fr-firststrand(链特异性建库)
 
+注：1. 数据测序类型分为单端测序和双端测序（recommend）；2. 建库类型有普通建库和链特异性建库
+reference：
+1. https://www.illumina.com/science/technology/next-generation-sequencing/plan-experiments/paired-end-vs-single-read.html
+2. https://www.jianshu.com/p/a63595a41bed
 
+此套数据目的之一是为了预测拟南芥基因组上lncRNA，lncRNA大多数处于基因的反义链上，所以在建库的时候使用了ssRNA-Seq，若无此需求使用普通建库即可
+
+`rawdata: Col-1-0_368368_all.R1.fastq.gz;Col-1-0_368368_all.R2.fastq.gz #双端测序是在两端设计引物进行测序，因此有R1,R2两个fq文件`
+
+fq文件详解：https://support.illumina.com/bulletins/2016/04/fastq-files-explained.html
 
 ## 1. 质控
+在进行数据分析之前需要对下机数据进行质检，目的是为了判断数据是否达标，大部分返回的测序数据为Cleandata（已去接头），质量均不错
 
-### fastqc
+### fastqc（质控软件）
+reference：
+fastqc： http://darlinglab.org/tutorials/fastqc/
+mulitiqc： https://multiqc.info/
 
 ```shell
-fastqc /data/FDY_analysis/RNA_seq/FDY/mac3ab/rawdata/*.fastq.gz -o fastqc
+fastqc /data/FDY_analysis/RNA_seq/FDY/mac3ab/rawdata/*.fastq.gz -o fastqc # *表示通配符，可对目录下所有.gz文件批量质控
 或 ls *.gz | while read id ;do fastqc $id ;done # while read 一次读取一行
-multiqc *fastqc.zip --ignore *.html
+multiqc *fastqc.zip --ignore *.html # 整合质控结果
 ```
 
 
-## 2. 比对
+## 2. 序列比对
 
 ### hisat2(√) or STAR
+reference： https://daehwankimlab.github.io/hisat2/manual/
 
-2.1	添加环境变量：
+2.1	添加环境变量：（在首次安装软件之前需配置环境，包括fastqc）
+reference：
+https://www.jianshu.com/p/9c2bf27c3921
+http://blog.sciencenet.cn/home.php?mod=space&uid=118204&do=blog&id=1226040
 
 ```shell
 vi ~/.bashrc #永久修改环境变量，可直接调用 hisat2
-export PATH=/data/sly/tools/hisat2-2.0.4/hisat2:$PATH
+export PATH=/data/sly/tools/hisat2-2.0.4/hisat2:$PATH # 在 bashrc 中加入此命令
 source ~/.bashrc #使修改生效
 ```
 
 2.2	构建索引：
+
+why index：高通量测序遇到的第一个问题就是，成千上万甚至上几亿条read如果在合理的时间内比对到参考基因组上，并且保证错误率在接受范围内。为了提高比对速度，就需要根据参考基因组序列，经过BWT算法转换成index，而我们比对的序列其实是index的一个子集。当然转录组比对还要考虑到可变剪切的情况，所以更加复杂。
+因此我门不是直接把read回贴到基因组上，而是把read和index进行比较
+
+reference： http://www.biotrainee.com/thread-26-1-1.html
 
 ```shell
 hisat2-build -p 10 Zea_mays.AGPv4.dna.toplevel.fa genome
 ```
 
 2.3	比对：
+
+初次进行比对时先尝试使用一组样本，再尝试批量比对
 
 ```shell
 wkpath1=/data/FDY_analysis/RNA_seq/FDY/mac3ab/rawdata/cleandata #设置工作路径
@@ -62,23 +93,22 @@ done
 ```
 
 
-### results
-
-`results: Col-1-0_368368_all.hisat2.bam`
-
 查看bam文件
 
 ```shell
 samtools view *.bam|less
 ```
 
-```shell
-ls *bam | while read id ;do (samtools flagstat -@ 10 $id > $(basename $id '.bam').flagstat) ;done  # flagstat 统计
-```
+sam/bam文件格式：https://hbctraining.github.io/Intro-to-rnaseq-hpc-O2/lessons/04_alignment_quality.html
 
+```shell
+ls *bam | while read id ;do (samtools flagstat -@ 10 $id > $(basename $id '.bam').flagstat) ;done  # flagstat 统计比对率
+```
+注：比对率高低只能说明样本纯度比较高，若比对率不高也不一定影响后续分析，有足够数据量就行
 
 ## 3. 使用IGV查看bam文件
 
+reference： http://software.broadinstitute.org/software/igv/
 bam文件在导入IGV前需进行排序及构建索引
 
 ```shell
@@ -91,19 +121,21 @@ do
 done
 ```
 
-IGV结果：
-
-![IGV](D:\RNA-Seq-fdy\markdown_file\IGV.jpg)
-
 
 
 ## 4. 区分bam文件的正反链
+
+数据为链特异性数据，因此在区分bam文件时需要区分正反链
 
 ### bamCoverage
 
 ```txt
 From: https://deeptools.readthedocs.io/en/develop/content/tools/bamCoverage.html
 
+1. Versions after 2.2
+--filterRNAstrand 此参数即可区分正反链
+
+2. Versions before 2.2
 For a stranded `paired-end` library
 To get the file for transcripts that originated from the forward strand:
 
@@ -175,9 +207,13 @@ done
 
 ## 5. 拼接转录本（有参）
 
+在预测新的lncRNA时常常需要进行转录本拼接，因为在参考 TAIR10 gff文件中并没有关于lncRNA的全部注释
+
 ### cufflink(√) or stringtie
+reference： http://cole-trapnell-lab.github.io/cufflinks/
 
 #### 用于预测新的转录本
+reference： https://www.jianshu.com/p/5b104830751b
 
 ```shell
 for i in `ls *.bam`
@@ -238,6 +274,8 @@ S-1-24_382382_all.hisat2.bam,S-2-24_385385_all.hisat2.bam
 or
 
 ```shell
+# reference： http://bioinf.wehi.edu.au/featureCounts/
+
 /data/software/subread-2.0.0-Linux-x86_64/bin/featureCounts -T 16 -p -s 1 -t exon 
 -g transcript_id \
 -a ./merged_asm/merged_cufflinks.gtf \
@@ -343,7 +381,6 @@ p_volcano = ggplot(nrDEG,aes(x=log2FoldChange,y=-log10(pvalue)))+
 plot(p_volcano)
 ```
 
-![1578383812(1)](D:\RNA-Seq-fdy\markdown_file\1578383812(1).png)
 
 ### 8.2	GO-AgriGO
 
@@ -366,8 +403,6 @@ theme_base()
 ```
 
 
-
-![1578382320(1)](D:\RNA-Seq-fdy\markdown_file\1578382320(1).png)
 
 
 
@@ -429,6 +464,8 @@ python /data/FDY_analysis/tools/CNCI-master/CNCI.py \
 ## 10. 可变剪接分析
 
 ### rMATS（需要有重复）
+
+reference： http://rnaseq-mats.sourceforge.net/
 
 ```shell
 for i in {0,3,24}
