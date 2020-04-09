@@ -7,9 +7,19 @@
 1. tophat + cufflink: https://www.ncbi.nlm.nih.gov/pubmed/22383036
 2. hisat2 + stringtie: https://www.ncbi.nlm.nih.gov/pubmed/?term=Transcript-level+expression+analysis+of+RNA-seq+experiments+with+HISAT%2C+StringTie+and+Ballgown
 
+快速了解 RNA-seq是什么！
+
+1. RNA-seq 小故事
+
+https://www.jianshu.com/p/d09e624efcab?utm_campaign=hugo&utm_medium=reader_share&utm_content=note&utm_source=weixin-friends
+
+2. 测序原理
+
+https://zhuanlan.zhihu.com/p/20702684
+
 注：所有本文用到的软件均在官网有详细说明
 
-根据自己需求：从以下方法选择一种即可
+根据自己需求：从以下方法选择一种组合即可
 
 A. 普通 RNA-Seq 分析：步骤 1(质控) + 2(比对) + 7(定量) + 8(差异分析)
 
@@ -18,27 +28,34 @@ B. 可变剪接分析：步骤 1(质控) + 2(比对) + 10(可变剪接)
 C. 预测新的转录本：步骤 1(质控) + 2(比对) + 5(拼接转录本) + 6(合并转录本) + 7(定量) + 8(差异分析) + 9(预测转录本)
 
 ## 数据样本：M,S,Col 此数据基本包括了所有转录本分析所需内容
-### 数据类型：paired, 150bp, 10×， fr-firststrand(链特异性建库)
+### 数据类型：paired-end, 150bp, 10×， fr-firststrand(链特异性建库)
 
-注：1. 数据测序类型分为单端测序和双端测序（recommend）；2. 建库类型有普通建库和链特异性建库
+1. 什么是单端测序和双端测序？
 
-reference：
+https://www.illumina.com/science/technology/next-generation-sequencing/plan-experiments/paired-end-vs-single-read.html
 
-1. https://www.illumina.com/science/technology/next-generation-sequencing/plan-experiments/paired-end-vs-single-read.html
-2. https://www.jianshu.com/p/a63595a41bed
+
+2. 什么是链特异性建库？
+
+https://www.jianshu.com/p/a63595a41bed
 
 此套数据目的之一是为了预测拟南芥基因组上lncRNA，lncRNA大多数处于基因的反义链上，所以在建库的时候使用了ssRNA-Seq，若无此需求使用普通建库即可
 
-`rawdata: Col-1-0_368368_all.R1.fastq.gz;Col-1-0_368368_all.R2.fastq.gz #双端测序是在两端设计引物进行测序，因此有R1,R2两个fq文件`
+什么是lncRNA：https://en.wikipedia.org/wiki/Long_non-coding_RNA
 
-fq文件详解：https://support.illumina.com/bulletins/2016/04/fastq-files-explained.html
+`rawdata: Col-1-0_368368_all.R1.fastq.gz;Col-1-0_368368_all.R2.fastq.gz 
+ #双端测序是在两端设计引物进行测序，因此有R1,R2两个fq文件`
+
+什么是fq文件：https://support.illumina.com/bulletins/2016/04/fastq-files-explained.html
 
 ## 1. 质控
-在进行数据分析之前需要对下机数据进行质检，目的是为了判断数据是否达标，大部分返回的测序数据为Cleandata（已去接头），质量均不错
+在进行数据分析之前需要对下机数据进行质检，目的是为了判断数据是否达标，大部分公司返回的测序数据为Cleandata（已去接头），质量均不错
 
 主要判断依据：Perbase sequence quality  Q20过滤法：箱型图10%的线大于 Q=20  Q=-10*lg10(error P)
 
 注：Per base sequence content 前几个碱基测序时候因为状态调整会导致测序略有偏差
+
+质控结果怎么看：https://zhuanlan.zhihu.com/p/20731723
 
 ### fastqc（质控软件）
 reference：
@@ -56,7 +73,10 @@ multiqc *fastqc.zip --ignore *.html # 整合质控结果
 ## 2. 序列比对
 
 ### hisat2(√) or STAR
-reference： https://daehwankimlab.github.io/hisat2/manual/
+
+比对工具的选择：https://www.jianshu.com/p/681e02e7f9af
+
+hisat2 怎么用： https://daehwankimlab.github.io/hisat2/manual/
 
 2.1	添加环境变量：（在首次安装软件之前需配置环境，包括fastqc）
 reference：
@@ -110,7 +130,7 @@ done
 samtools view *.bam|less
 ```
 
-sam/bam文件格式：https://hbctraining.github.io/Intro-to-rnaseq-hpc-O2/lessons/04_alignment_quality.html
+什么是bam文件：https://hbctraining.github.io/Intro-to-rnaseq-hpc-O2/lessons/04_alignment_quality.html
 
 ```shell
 ls *bam | while read id ;do (samtools flagstat -@ 10 $id > $(basename $id '.bam').flagstat) ;done  # flagstat 统计比对率
@@ -119,7 +139,10 @@ ls *bam | while read id ;do (samtools flagstat -@ 10 $id > $(basename $id '.bam'
 
 ## 3. 使用IGV查看bam文件
 
-reference： http://software.broadinstitute.org/software/igv/
+IGV 怎么用： 
+
+1. http://software.broadinstitute.org/software/igv/
+2. https://www.jianshu.com/p/e5338858dd82
 
 bam文件在导入IGV前需进行排序及构建索引
 
@@ -225,12 +248,14 @@ done
 
 在预测新的lncRNA时常常需要进行转录本拼接，因为在参考 TAIR10 gff文件中并没有关于lncRNA的全部注释
 
-### cufflink(√) or stringtie
-reference： http://cole-trapnell-lab.github.io/cufflinks/
+### cufflink or stringtie
+cufflink： http://cole-trapnell-lab.github.io/cufflinks/
+
+stringtie： http://ccb.jhu.edu/software/stringtie/
 
 #### 用于预测新的转录本
-reference： https://www.jianshu.com/p/5b104830751b
 
+5.1 cufflink
 ```shell
 for i in `ls *.bam`
 do
@@ -246,11 +271,20 @@ done
 
 `cuffcom_split.transcripts.gtf.refmap;cuffcom_split.transcripts.gtf.tmap;genes.fpkm_tracking;isoforms.fpkm_tracking;transcripts.gtf`
 
-
+5.2 stringtie
+```shell
+for i in `ls ${wkpath_N7_results}/results_bam/*.bam`
+do
+    sample_name=`basename $i .bam`
+    echo ------- start stringtie ${sample_name}
+    stringtie ${wkpath_N7_results}/results_bam/${sample_name}.bam -p 20 -G /data/FDY_analysis/Ara_gff_file/TAIR10.GFF3.genes.gff -o ${wkpath_N7_results}/results_bam/stringtie_gtf/${sample_name}_stringtie.gtf
+    echo ------ finish ${sample_name} pinjie
+done
+```
 
 ## 6. 合并转录本
 
-### cuffmerge
+### cufflinks-cuffmerge 
 
 ```shell
 cuffmerge -p 12 
@@ -264,12 +298,23 @@ cuffmerge -p 12
 
 `results: merged_cufflinks.gff`
 
+### stringtie --merge
 
+```shell
+echo ------ create a gtf list
+ls ${wkpath_N7_results}/results_bam/stringtie_gtf/*.gtf > ${wkpath_N7_results}/results_bam/stringtie_gtf/mergelist.txt
+echo ------ begin merge
+stringtie --merge -p 20 -G /data/FDY_analysis/Ara_gff_file/TAIR10.GFF3.genes.gff -o ${wkpath_N7_results}/results_bam/stringtie_gtf/stringtie_merged.gtf ${wkpath_N7_results}/results_bam/stringtie_gtf/mergelist.txt
+echo ------ merge done
+```
 
 ## 7. 定量
 
-### cuffdiff(√) or featurecounts
+### cuffdiff or stringtie or featurecounts
 
+千万注意：若是普通RNA-Seq分析/可变剪接，定量时使用的 gff 文件为原始 gff；若是预测新的转录本，此处是唯一一次需要修改 gff 为 merged.gff 的步骤
+
+7.1 cuffdiff 定量及差异分析,包含 FPKM 结果
 ```shell
 cuffdiff -o diffout_all -p 12 
 -b /data/FDY_analysis/Arabidposis_index_hisat2/Arabidopsis_TAIR10_gene_JYX.fa \
@@ -287,10 +332,23 @@ S-1-3_381381_all.hisat2.bam,S-2-3_384384_all.hisat2.bam
 S-1-24_382382_all.hisat2.bam,S-2-24_385385_all.hisat2.bam
 ```
 
-or
+7.2 stringtie 定量，包含 coverage,FPKM,TPM 结果
+```shell
+echo ------ begin quantify
+for i in `ls ${wkpath_N7_results}/results_bam/*.bam`
+do
+    sample_name=`basename $i .bam`
+    stringtie -e -B -p 20 -G ${wkpath_N7_results}/results_bam/stringtie_gtf/stringtie_merged.gtf -o ${wkpath_N7_results}/results_bam/stringtie_gtf/ballgown/${sample_name}/${sample_name}.gtf ${wkpath_N7_results}/results_bam/${sample_name}.bam
+done
+echo ------ quantify finished
+```
+结果说明：输出的结果在 bllgown 文件夹下，接下来可使用官方提供的 ballgown 进行差异；也可使用 prepDE.py 文件提取原始 counts 结合 DEseq2 进行
+差异分析 （推荐后者）
+
+7.3 featurecounts
+reference： http://bioinf.wehi.edu.au/featureCounts/
 
 ```shell
-# reference： http://bioinf.wehi.edu.au/featureCounts/
 
 /data/software/subread-2.0.0-Linux-x86_64/bin/featureCounts -T 16 -p -s 1 -t exon 
 -g transcript_id \
@@ -311,7 +369,7 @@ reference：
 
 ### 8.1	挑选差异基因
 
-若是cuffdiff结果，直接用 **gene.exp.diff** 文件筛选差异基因；若是featurecounts结果，使用DESeq2
+若是cuffdiff结果，直接用 **gene.exp.diff** 文件筛选差异基因；若是stringtie/featurecounts结果，使用DESeq2
 
 阈值：q/p < 0.05 , |FC| >= 1.5/2
 
@@ -430,6 +488,8 @@ theme_base()
 
 ## 9. 预测 lncRNA
 
+鉴定全新的lncRNA： https://www.jianshu.com/p/5b104830751b
+
 ### cuffcompare
 
 gtf文件与gff文件格式转换
@@ -451,6 +511,8 @@ awk '{if($3 == "u" || $3 == "i" || $3 == "u"){print $0}}' filter1.txt > filter2.
 ```
 
 预测lncRNA是否编码: CPC or CNCI
+
+lncRNA真真假假： https://www.jianshu.com/p/0b355662c013
 
 For CPC analysis:
 
@@ -484,6 +546,8 @@ python /data/FDY_analysis/tools/CNCI-master/CNCI.py \
 
 
 ## 10. 可变剪接分析
+
+什么是可变剪接：https://www.jianshu.com/p/759a5a714aa3
 
 ### rMATS（需要有重复）
 
