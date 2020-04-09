@@ -7,7 +7,7 @@
 1. tophat + cufflink: https://www.ncbi.nlm.nih.gov/pubmed/22383036
 2. hisat2 + stringtie: https://www.ncbi.nlm.nih.gov/pubmed/?term=Transcript-level+expression+analysis+of+RNA-seq+experiments+with+HISAT%2C+StringTie+and+Ballgown
 
-**快速了解 RNA-seq是什么！
+**快速了解 RNA-seq是什么！**
 
 **RNA-seq 小故事
 
