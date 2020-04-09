@@ -9,38 +9,38 @@
 
 **快速了解 RNA-seq是什么！**
 
-**RNA-seq 小故事
+**RNA-seq 小故事**
 
 1. https://www.jianshu.com/p/d09e624efcab?utm_campaign=hugo&utm_medium=reader_share&utm_content=note&utm_source=weixin-friends
 
-**测序原理
+**测序原理**
 
 2. https://zhuanlan.zhihu.com/p/20702684
 
 注：所有本文用到的软件均在官网有详细说明
 
-**根据自己需求：从以下方法选择一种组合即可
+**根据自己需求：从以下方法选择一种组合即可**
 
-A. 普通 RNA-Seq 分析：步骤 1(质控) + 2(比对) + 7(定量) + 8(差异分析)
+**A. 普通 RNA-Seq 分析**：步骤 1(质控) + 2(比对) + 7(定量) + 8(差异分析)
 
-B. 可变剪接分析：步骤 1(质控) + 2(比对) + 10(可变剪接)
+**B. 可变剪接分析**：步骤 1(质控) + 2(比对) + 10(可变剪接)
 
-C. 预测新的转录本：步骤 1(质控) + 2(比对) + 5(拼接转录本) + 6(合并转录本) + 7(定量) + 8(差异分析) + 9(预测转录本)
+**C. 预测新的转录本**：步骤 1(质控) + 2(比对) + 5(拼接转录本) + 6(合并转录本) + 7(定量) + 8(差异分析) + 9(预测转录本)
 
 
 ## 数据样本：M,S,Col 此数据基本包括了所有转录本分析所需内容
 ### 数据类型：paired-end, 150bp, 10×， fr-firststrand(链特异性建库)
 
-**什么是单端测序和双端测序？
+**什么是单端测序和双端测序？**
 
 https://www.illumina.com/science/technology/next-generation-sequencing/plan-experiments/paired-end-vs-single-read.html
 
 
-**什么是链特异性建库？
+**什么是链特异性建库？**
 
 https://www.jianshu.com/p/a63595a41bed
 
-此套数据目的之一是为了预测拟南芥基因组上lncRNA，lncRNA大多数处于基因的反义链上，所以在建库的时候使用了ssRNA-Seq，若无此需求使用普通建库即可
+此套数据目的之一是为了**预测拟南芥基因组上lncRNA**，lncRNA大多数处于基因的反义链上，所以在建库的时候使用了**ssRNA-Seq**，若无此需求使用普通建库即可
 
 **什么是lncRNA**：https://en.wikipedia.org/wiki/Long_non-coding_RNA
 
@@ -50,19 +50,20 @@ https://www.jianshu.com/p/a63595a41bed
 **什么是fq文件**：https://support.illumina.com/bulletins/2016/04/fastq-files-explained.html
 
 ## 1. 质控
-在进行数据分析之前需要对下机数据进行质检，目的是为了判断数据是否达标，大部分公司返回的测序数据为Cleandata（已去接头），质量均不错
+在进行数据分析之前需要对下机数据进行质检，目的是为了判断数据是否达标，大部分公司返回的测序数据为**Cleandata（已去接头）**，质量均不错
 
-主要判断依据：Perbase sequence quality  Q20过滤法：箱型图10%的线大于 Q=20  Q=-10*lg10(error P)
+**主要判断依据**：Perbase sequence quality  **Q20过滤法**：箱型图10%的线大于 Q=20  Q=-10*lg10(error P)
 
 注：Per base sequence content 前几个碱基测序时候因为状态调整会导致测序略有偏差
 
 **质控结果怎么看**：https://zhuanlan.zhihu.com/p/20731723
 
 ### fastqc（质控软件）
+
 reference：
 
-fastqc： http://darlinglab.org/tutorials/fastqc/
-mulitiqc： https://multiqc.info/
+**fastqc**： http://darlinglab.org/tutorials/fastqc/
+**mulitiqc**： https://multiqc.info/
 
 ```shell
 fastqc /data/FDY_analysis/RNA_seq/FDY/mac3ab/rawdata/*.fastq.gz -o fastqc # *表示通配符，可对目录下所有.gz文件批量质控
@@ -75,11 +76,11 @@ multiqc *fastqc.zip --ignore *.html # 整合质控结果
 
 ### hisat2(√) or STAR
 
-比对工具的选择：https://www.jianshu.com/p/681e02e7f9af
+**比对工具的选择**：https://www.jianshu.com/p/681e02e7f9af
 
-hisat2 怎么用： https://daehwankimlab.github.io/hisat2/manual/
+**hisat2 怎么用**： https://daehwankimlab.github.io/hisat2/manual/
 
-2.1	添加环境变量：（在首次安装软件之前需配置环境，包括fastqc）
+**2.1	添加环境变量：（在首次安装软件之前需配置环境，包括fastqc）**
 
 reference：
 
@@ -93,9 +94,9 @@ export PATH=/data/sly/tools/hisat2-2.0.4/hisat2:$PATH # 在 bashrc 中加入此�
 source ~/.bashrc #使修改生效
 ```
 
-2.2	构建索引：
+**2.2	构建索引：**
 
-why index：高通量测序遇到的第一个问题就是，成千上万甚至上几亿条read如果在合理的时间内比对到参考基因组上，并且保证错误率在接受范围内。为了提高比对速度，就需要根据参考基因组序列，经过BWT算法转换成index，而我们比对的序列其实是index的一个子集。当然转录组比对还要考虑到可变剪切的情况，所以更加复杂。
+**why index**：高通量测序遇到的第一个问题就是，成千上万甚至上几亿条read如果在合理的时间内比对到参考基因组上，并且保证错误率在接受范围内。为了提高比对速度，就需要根据参考基因组序列，经过BWT算法转换成index，而我们比对的序列其实是index的一个子集。当然转录组比对还要考虑到可变剪切的情况，所以更加复杂。
 因此我门不是直接把read回贴到基因组上，而是把read和index进行比较
 
 reference： http://www.biotrainee.com/thread-26-1-1.html
@@ -104,7 +105,7 @@ reference： http://www.biotrainee.com/thread-26-1-1.html
 hisat2-build -p 10 Zea_mays.AGPv4.dna.toplevel.fa genome
 ```
 
-2.3	比对：
+**2.3	比对：**
 
 初次进行比对时先尝试使用一组样本，再尝试批量比对
 
@@ -127,27 +128,27 @@ done
 ```
 
 
-查看bam文件
+**查看bam文件**
 
 ```shell
 samtools view *.bam|less
 ```
 
-什么是bam文件：https://hbctraining.github.io/Intro-to-rnaseq-hpc-O2/lessons/04_alignment_quality.html
+**什么是bam文件**：https://hbctraining.github.io/Intro-to-rnaseq-hpc-O2/lessons/04_alignment_quality.html
 
 ```shell
 ls *bam | while read id ;do (samtools flagstat -@ 10 $id > $(basename $id '.bam').flagstat) ;done  # flagstat 统计比对率
 ```
-注：比对率高低只能说明样本纯度比较高，若比对率不高也不一定影响后续分析，有足够数据量就行
+注：比对率高低只能说明样本纯度比较高，若比对率不高也不一定影响后续分析，有**足够数据量**就行
 
 ## 3. 使用IGV查看bam文件
 
-IGV 怎么用： 
+**IGV 怎么用：** 
 
 1. http://software.broadinstitute.org/software/igv/
 2. https://www.jianshu.com/p/e5338858dd82
 
-bam文件在导入IGV前需进行排序及构建索引
+bam文件在导入IGV前需进行**排序及构建索引**
 
 ```shell
 workpath=/data/FDY_analysis/RNA_seq/FDY/mac3ab/rawdata/hisat2_results
@@ -165,7 +166,7 @@ done
 
 数据为链特异性数据，因此在区分bam文件时需要区分正反链
 
-不同样本间比较需对wig文件进行标准化：--normalizeUsing (Possible choices: RPKM, CPM, BPM, RPGC, None)
+**不同样本间比较需对wig文件进行标准化**：--normalizeUsing (Possible choices: RPKM, CPM, BPM, RPGC, None)
 
 reference: https://mp.weixin.qq.com/s?__biz=MzIwODA1MzI4Mg==&mid=2456011255&idx=1&sn=c2d6c19150f2896a8d89fbf07e07522e&chksm=809f94bab7e81dacf31b62eb7159487b112dab496b97619686f01b54f1ce5133733dfa706948&scene=21#wechat_redirect
 
@@ -253,13 +254,13 @@ done
 
 ### cufflink or stringtie
 
-cufflink： http://cole-trapnell-lab.github.io/cufflinks/
+**cufflink**： http://cole-trapnell-lab.github.io/cufflinks/
 
-stringtie： http://ccb.jhu.edu/software/stringtie/
+**stringtie**： http://ccb.jhu.edu/software/stringtie/
 
 #### 用于预测新的转录本
 
-5.1 cufflink
+**5.1 cufflink**
 ```shell
 for i in `ls *.bam`
 do
@@ -271,11 +272,11 @@ do
 done
 ```
 
-**results
+**results**
 
 `cuffcom_split.transcripts.gtf.refmap;cuffcom_split.transcripts.gtf.tmap;genes.fpkm_tracking;isoforms.fpkm_tracking;transcripts.gtf`
 
-5.2 stringtie
+**5.2 stringtie**
 ```shell
 for i in `ls ${wkpath_N7_results}/results_bam/*.bam`
 do
@@ -316,9 +317,9 @@ echo ------ merge done
 
 ### cuffdiff or stringtie or featurecounts
 
-**千万注意：若是普通RNA-Seq分析/可变剪接，定量时使用的 gff 文件为原始 gff；若是预测新的转录本，此处是唯一一次需要修改 gff 为 merged.gff 的步骤
+**千万注意：若是普通RNA-Seq分析/可变剪接，定量时使用的 gff 文件为原始 gff；若是预测新的转录本，此处是唯一一次需要修改 gff 为 merged.gff 的步骤**
 
-7.1 cuffdiff 定量及差异分析,包含 FPKM 结果
+**7.1 cuffdiff 定量及差异分析,包含 FPKM 结果**
 ```shell
 cuffdiff -o diffout_all -p 12 
 -b /data/FDY_analysis/Arabidposis_index_hisat2/Arabidopsis_TAIR10_gene_JYX.fa \
@@ -336,7 +337,7 @@ S-1-3_381381_all.hisat2.bam,S-2-3_384384_all.hisat2.bam
 S-1-24_382382_all.hisat2.bam,S-2-24_385385_all.hisat2.bam
 ```
 
-7.2 stringtie 定量，包含 coverage,FPKM,TPM 结果
+**7.2 stringtie 定量，包含 coverage,FPKM,TPM 结果，但未进行差异分析**
 ```shell
 echo ------ begin quantify
 for i in `ls ${wkpath_N7_results}/results_bam/*.bam`
@@ -346,10 +347,10 @@ do
 done
 echo ------ quantify finished
 ```
-结果说明：输出的结果在 bllgown 文件夹下，接下来可使用官方提供的 ballgown 进行差异；也可使用 prepDE.py 文件提取原始 counts 结合 DEseq2 进行
+结果说明：输出的结果在 bllgown 文件夹下，接下来可使用官方提供的 **ballgown** 进行差异；也可使用 **prepDE.py** 文件提取**原始 counts** 结合 DEseq2 进行
 差异分析 （推荐后者）
 
-7.3 featurecounts
+**7.3 featurecounts 定量**
 
 reference： http://bioinf.wehi.edu.au/featureCounts/
 
@@ -365,7 +366,7 @@ reference： http://bioinf.wehi.edu.au/featureCounts/
 
 ## 8. 差异分析
 
-差异分析前必看标准化问题
+差异分析前必看**标准化**问题
 
 reference：
 
@@ -375,7 +376,7 @@ reference：
 
 ### 8.1	挑选差异基因
 
-若是cuffdiff结果，直接用 **gene.exp.diff** 文件筛选差异基因；若是stringtie/featurecounts结果，使用DESeq2
+若是cuffdiff结果，直接用 **gene.exp.diff** 文件筛选差异基因；若是stringtie/featurecounts结果，使用 **DESeq2**
 
 阈值：q/p < 0.05 , |FC| >= 1.5/2
 
@@ -405,7 +406,7 @@ write.csv(diff_gene_deseq2_res_n0_vs_c0,file= "DEG_n0_vs_c0.csv")
 
 
 
-8.1.1	差异基因可视化
+**8.1.1	差异基因可视化**
 
 ```R
 ###################################### 热图 #######################################
@@ -472,7 +473,7 @@ plot(p_volcano)
 
 URL: http://systemsbiology.cau.edu.cn/agriGOv2/
 
-8.2.1	GO结果可视化
+**8.2.1	GO结果可视化**
 
 ```R
 library(ggpubr) #载入包
@@ -494,11 +495,11 @@ theme_base()
 
 ## 9. 预测 lncRNA
 
-鉴定全新的lncRNA： https://www.jianshu.com/p/5b104830751b
+**鉴定全新的lncRNA**： https://www.jianshu.com/p/5b104830751b
 
 ### cuffcompare
 
-gtf文件与gff文件格式转换
+**gtf文件与gff文件格式转换**
 
 ```shell
 # gff to gtf
@@ -507,7 +508,7 @@ gffread my.gff3 -T -o my.gtf
 gffread merged.gtf -o- > merged.gff3
 ```
 
-筛选 lncRNA
+**筛选 lncRNA**
 
 ```shell
 cuffcompare -r /data/FDY_analysis/Ara_gff_file/TAIR10.GFF3.genes.gtf -p 12 
@@ -516,9 +517,9 @@ awk '{if($7 >= 0.5 && $10 >1 && $11 > 200){print $0}}' cuffcom.merged_cufflinks.
 awk '{if($3 == "u" || $3 == "i" || $3 == "u"){print $0}}' filter1.txt > filter2.txt
 ```
 
-预测lncRNA是否编码: CPC or CNCI
+**预测lncRNA是否编码**: CPC or CNCI
 
-lncRNA真真假假： https://www.jianshu.com/p/0b355662c013
+**lncRNA真真假假**： https://www.jianshu.com/p/0b355662c013
 
 For CPC analysis:
 
@@ -553,7 +554,7 @@ python /data/FDY_analysis/tools/CNCI-master/CNCI.py \
 
 ## 10. 可变剪接分析
 
-什么是可变剪接：https://www.jianshu.com/p/759a5a714aa3
+**什么是可变剪接**：https://www.jianshu.com/p/759a5a714aa3
 
 ### rMATS（需要有重复）
 
@@ -579,7 +580,7 @@ RNA_seq/FDY/mac3ab/rawdata/hisat2_results_for_cufflink/results_bam/merged_asm/me
 done
 ```
 
-对可变剪接结果可视化：
+**对可变剪接结果可视化：**
 
 ```R
 library(upsetR)
