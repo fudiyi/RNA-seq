@@ -7,19 +7,19 @@
 1. tophat + cufflink: https://www.ncbi.nlm.nih.gov/pubmed/22383036
 2. hisat2 + stringtie: https://www.ncbi.nlm.nih.gov/pubmed/?term=Transcript-level+expression+analysis+of+RNA-seq+experiments+with+HISAT%2C+StringTie+and+Ballgown
 
-快速了解 RNA-seq是什么！
+**快速了解 RNA-seq是什么！
 
-1. RNA-seq 小故事
+**RNA-seq 小故事
 
-https://www.jianshu.com/p/d09e624efcab?utm_campaign=hugo&utm_medium=reader_share&utm_content=note&utm_source=weixin-friends
+1. https://www.jianshu.com/p/d09e624efcab?utm_campaign=hugo&utm_medium=reader_share&utm_content=note&utm_source=weixin-friends
 
-2. 测序原理
+**测序原理
 
-https://zhuanlan.zhihu.com/p/20702684
+2. https://zhuanlan.zhihu.com/p/20702684
 
 注：所有本文用到的软件均在官网有详细说明
 
-根据自己需求：从以下方法选择一种组合即可
+**根据自己需求：从以下方法选择一种组合即可
 
 A. 普通 RNA-Seq 分析：步骤 1(质控) + 2(比对) + 7(定量) + 8(差异分析)
 
@@ -27,26 +27,27 @@ B. 可变剪接分析：步骤 1(质控) + 2(比对) + 10(可变剪接)
 
 C. 预测新的转录本：步骤 1(质控) + 2(比对) + 5(拼接转录本) + 6(合并转录本) + 7(定量) + 8(差异分析) + 9(预测转录本)
 
+
 ## 数据样本：M,S,Col 此数据基本包括了所有转录本分析所需内容
 ### 数据类型：paired-end, 150bp, 10×， fr-firststrand(链特异性建库)
 
-1. 什么是单端测序和双端测序？
+**什么是单端测序和双端测序？
 
 https://www.illumina.com/science/technology/next-generation-sequencing/plan-experiments/paired-end-vs-single-read.html
 
 
-2. 什么是链特异性建库？
+**什么是链特异性建库？
 
 https://www.jianshu.com/p/a63595a41bed
 
 此套数据目的之一是为了预测拟南芥基因组上lncRNA，lncRNA大多数处于基因的反义链上，所以在建库的时候使用了ssRNA-Seq，若无此需求使用普通建库即可
 
-什么是lncRNA：https://en.wikipedia.org/wiki/Long_non-coding_RNA
+**什么是lncRNA**：https://en.wikipedia.org/wiki/Long_non-coding_RNA
 
 `rawdata: Col-1-0_368368_all.R1.fastq.gz;Col-1-0_368368_all.R2.fastq.gz 
  #双端测序是在两端设计引物进行测序，因此有R1,R2两个fq文件`
 
-什么是fq文件：https://support.illumina.com/bulletins/2016/04/fastq-files-explained.html
+**什么是fq文件**：https://support.illumina.com/bulletins/2016/04/fastq-files-explained.html
 
 ## 1. 质控
 在进行数据分析之前需要对下机数据进行质检，目的是为了判断数据是否达标，大部分公司返回的测序数据为Cleandata（已去接头），质量均不错
@@ -55,7 +56,7 @@ https://www.jianshu.com/p/a63595a41bed
 
 注：Per base sequence content 前几个碱基测序时候因为状态调整会导致测序略有偏差
 
-质控结果怎么看：https://zhuanlan.zhihu.com/p/20731723
+**质控结果怎么看**：https://zhuanlan.zhihu.com/p/20731723
 
 ### fastqc（质控软件）
 reference：
@@ -79,9 +80,11 @@ multiqc *fastqc.zip --ignore *.html # 整合质控结果
 hisat2 怎么用： https://daehwankimlab.github.io/hisat2/manual/
 
 2.1	添加环境变量：（在首次安装软件之前需配置环境，包括fastqc）
+
 reference：
 
 https://www.jianshu.com/p/9c2bf27c3921
+
 http://blog.sciencenet.cn/home.php?mod=space&uid=118204&do=blog&id=1226040
 
 ```shell
@@ -249,6 +252,7 @@ done
 在预测新的lncRNA时常常需要进行转录本拼接，因为在参考 TAIR10 gff文件中并没有关于lncRNA的全部注释
 
 ### cufflink or stringtie
+
 cufflink： http://cole-trapnell-lab.github.io/cufflinks/
 
 stringtie： http://ccb.jhu.edu/software/stringtie/
@@ -267,7 +271,7 @@ do
 done
 ```
 
-### results
+**results
 
 `cuffcom_split.transcripts.gtf.refmap;cuffcom_split.transcripts.gtf.tmap;genes.fpkm_tracking;isoforms.fpkm_tracking;transcripts.gtf`
 
@@ -312,7 +316,7 @@ echo ------ merge done
 
 ### cuffdiff or stringtie or featurecounts
 
-千万注意：若是普通RNA-Seq分析/可变剪接，定量时使用的 gff 文件为原始 gff；若是预测新的转录本，此处是唯一一次需要修改 gff 为 merged.gff 的步骤
+**千万注意：若是普通RNA-Seq分析/可变剪接，定量时使用的 gff 文件为原始 gff；若是预测新的转录本，此处是唯一一次需要修改 gff 为 merged.gff 的步骤
 
 7.1 cuffdiff 定量及差异分析,包含 FPKM 结果
 ```shell
@@ -346,6 +350,7 @@ echo ------ quantify finished
 差异分析 （推荐后者）
 
 7.3 featurecounts
+
 reference： http://bioinf.wehi.edu.au/featureCounts/
 
 ```shell
@@ -365,6 +370,7 @@ reference： http://bioinf.wehi.edu.au/featureCounts/
 reference：
 
 1. https://www.jianshu.com/p/cd2888fec66b
+
 2. https://www.jianshu.com/p/248228be3cf0
 
 ### 8.1	挑选差异基因
