@@ -60,7 +60,7 @@ https://www.jianshu.com/p/a63595a41bed
 
 ### fastqc（质控软件）
 
-reference：
+**reference：**
 
 **fastqc**： http://darlinglab.org/tutorials/fastqc/
 **mulitiqc**： https://multiqc.info/
@@ -82,7 +82,7 @@ multiqc *fastqc.zip --ignore *.html # 整合质控结果
 
 **2.1	添加环境变量：（在首次安装软件之前需配置环境，包括fastqc）**
 
-reference：
+**什么是环境变量：**
 
 https://www.jianshu.com/p/9c2bf27c3921
 
@@ -97,9 +97,9 @@ source ~/.bashrc #使修改生效
 **2.2	构建索引：**
 
 **why index**：高通量测序遇到的第一个问题就是，成千上万甚至上几亿条read如果在合理的时间内比对到参考基因组上，并且保证错误率在接受范围内。为了提高比对速度，就需要根据参考基因组序列，经过BWT算法转换成index，而我们比对的序列其实是index的一个子集。当然转录组比对还要考虑到可变剪切的情况，所以更加复杂。
-因此我门不是直接把read回贴到基因组上，而是把read和index进行比较
+因此我们不是直接把read回贴到基因组上，而是把read和index进行比较
 
-reference： http://www.biotrainee.com/thread-26-1-1.html
+**reference**： http://www.biotrainee.com/thread-26-1-1.html
 
 ```shell
 hisat2-build -p 10 Zea_mays.AGPv4.dna.toplevel.fa genome
@@ -164,11 +164,11 @@ done
 
 ## 4. 区分bam文件的正反链
 
-数据为链特异性数据，因此在区分bam文件时需要区分正反链
+数据为**链特异性数据**，因此在区分bam文件时需要区分正反链
 
-**不同样本间比较需对wig文件进行标准化**：--normalizeUsing (Possible choices: RPKM, CPM, BPM, RPGC, None)
+**不同样本间比较需对wig文件进行标准化**：--normalizeUsing (Possible choices: RPKM, CPM, **BPM**, RPGC, None)
 
-reference: https://mp.weixin.qq.com/s?__biz=MzIwODA1MzI4Mg==&mid=2456011255&idx=1&sn=c2d6c19150f2896a8d89fbf07e07522e&chksm=809f94bab7e81dacf31b62eb7159487b112dab496b97619686f01b54f1ce5133733dfa706948&scene=21#wechat_redirect
+**reference**: https://mp.weixin.qq.com/s?__biz=MzIwODA1MzI4Mg==&mid=2456011255&idx=1&sn=c2d6c19150f2896a8d89fbf07e07522e&chksm=809f94bab7e81dacf31b62eb7159487b112dab496b97619686f01b54f1ce5133733dfa706948&scene=21#wechat_redirect
 
 ### bamCoverage
 
@@ -225,7 +225,7 @@ $ bamCoverage -b rev.bam -o a.rev.bw
 $ rm a.rev*.bam
 ```
 
-
+**Versions before 2.2**
 
 ```shell
 workpath=/data/FDY_analysis/RNA_seq/FDY/mac3ab/rawdata/hisat2_results
@@ -246,11 +246,26 @@ do
 done
 ```
 
+**Versions after 2.2**
+
+
+```shell
+for i in $(ls ${wkpath_rawdata}/*.R1.fastq.gz)
+do
+    sample_name=`basename $i .R1.fastq.gz`
+    bamCoverage -b ${wkpath_results}/results_bam/${sample_name}.hisat2.bam -o ${wkpath_results}/results_bam/wig/${sample_name}_fw.bw -p 20 -bs 10 --effectiveGenomeSize 119481543 --normalizeUsing BPM --filterRNAstrand forward
+    bamCoverage -b ${wkpath_results}/results_bam/${sample_name}.hisat2.bam -o ${wkpath_results}/results_bam/wig/${sample_name}_re.bw -p 20 -bs 10 --effectiveGenomeSize 119481543 --normalizeUsing BPM --filterRNAstrand reverse
+done
+echo finished
+
+--effectiveGenomeSize 119481543 # 拟南芥基因组碱基除 N 之外大小
+--normalizeUsing BPM # BPM == TPM 
+```
 
 
 ## 5. 拼接转录本（有参）
 
-在预测新的lncRNA时常常需要进行转录本拼接，因为在参考 TAIR10 gff文件中并没有关于lncRNA的全部注释
+在**预测新的lncRNA时**常常需要进行转录本拼接，因为在参考 TAIR10 gff文件中并没有关于lncRNA的全部注释
 
 ### cufflink or stringtie
 
@@ -368,7 +383,7 @@ reference： http://bioinf.wehi.edu.au/featureCounts/
 
 差异分析前必看**标准化**问题
 
-reference：
+**reference**：
 
 1. https://www.jianshu.com/p/cd2888fec66b
 
@@ -378,7 +393,7 @@ reference：
 
 若是cuffdiff结果，直接用 **gene.exp.diff** 文件筛选差异基因；若是stringtie/featurecounts结果，使用 **DESeq2**
 
-阈值：q/p < 0.05 , |FC| >= 1.5/2
+**阈值**：q/p < 0.05 , **|FC|** >= 1.5/2
 
 ```R
 library(DESeq2)
