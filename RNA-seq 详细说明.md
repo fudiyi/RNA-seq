@@ -104,6 +104,7 @@ source ~/.bashrc #使修改生效
 ```shell
 hisat2-build -p 10 Zea_mays.AGPv4.dna.toplevel.fa genome
 ```
+**什么是fa文件**：https://zh.wikipedia.org/wiki/FASTA%E6%A0%BC%E5%BC%8F
 
 **2.3	比对：**
 
@@ -512,9 +513,13 @@ theme_base()
 
 **鉴定全新的lncRNA**： https://www.jianshu.com/p/5b104830751b
 
-### cuffcompare
+### 9.1 预测新的lncRNA：cuffcompare or gffcompare
 
-**gtf文件与gff文件格式转换**
+**cuffcompare**：http://cole-trapnell-lab.github.io/cufflinks/cuffcompare/
+
+**gffcompare**： http://ccb.jhu.edu/software/stringtie/gffcompare.shtml
+
+**gtf文件与gff文件格式转换**：gffread
 
 ```shell
 # gff to gtf
@@ -525,14 +530,22 @@ gffread merged.gtf -o- > merged.gff3
 
 **筛选 lncRNA**
 
+**cuffcompare**
 ```shell
 cuffcompare -r /data/FDY_analysis/Ara_gff_file/TAIR10.GFF3.genes.gtf -p 12 
 -o ./cuffcom_split -i ../gtf_all_list.txt
 awk '{if($7 >= 0.5 && $10 >1 && $11 > 200){print $0}}' cuffcom.merged_cufflinks.gtf.tmap > filter1.txt
-awk '{if($3 == "u" || $3 == "i" || $3 == "u"){print $0}}' filter1.txt > filter2.txt
+awk '{if($3 == "u" || $3 == "i" || $3 == "x"){print $0}}' filter1.txt > filter2.txt
 ```
 
-**预测lncRNA是否编码**: CPC or CNCI
+**gffcompare**
+```shell
+gffcompare -r /data/FDY_analysis/Ara_gff_file/TAIR10.GFF3.genes.gtf -o ./gffcompare/strtcmp ./stringtie_merged_skip.gtf
+awk '{if($3 == "u" || $3 == "i" || $3 == "x"){print $0}}' strtcmp.stringtie_merged_skip.gtf.tmap > filter1.txt 
+awk '{if($6 >1 && $10 > 200){print $0}}' filter1.txt > filter2.txt # 筛选exon大于1，length大于200的基因
+```
+
+### 9.2 **预测lncRNA是否编码**: CPC or CNCI
 
 **lncRNA真真假假**： https://www.jianshu.com/p/0b355662c013
 
