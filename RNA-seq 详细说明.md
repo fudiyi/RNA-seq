@@ -390,7 +390,7 @@ reference： http://bioinf.wehi.edu.au/featureCounts/
 
 2. https://www.jianshu.com/p/248228be3cf0
 
-3. https://hbctraining.github.io/DGE_workshop/lessons/02_DGE_count_normalization.html（推荐看这个）
+3. https://hbctraining.github.io/DGE_workshop/lessons/02_DGE_count_normalization.html （推荐看这个）
 
 ### 8.1	挑选差异基因
 
