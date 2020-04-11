@@ -390,6 +390,8 @@ reference： http://bioinf.wehi.edu.au/featureCounts/
 
 2. https://www.jianshu.com/p/248228be3cf0
 
+3. https://hbctraining.github.io/DGE_workshop/lessons/02_DGE_count_normalization.html（推荐看这个）
+
 ### 8.1	挑选差异基因
 
 若是cuffdiff结果，直接用 **gene.exp.diff** 文件筛选差异基因；若是stringtie/featurecounts结果，使用 **DESeq2**
