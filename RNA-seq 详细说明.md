@@ -328,6 +328,7 @@ echo ------ begin merge
 stringtie --merge -p 20 -G /data/FDY_analysis/Ara_gff_file/TAIR10.GFF3.genes.gff -o ${wkpath_N7_results}/results_bam/stringtie_gtf/stringtie_merged.gtf ${wkpath_N7_results}/results_bam/stringtie_gtf/mergelist.txt
 echo ------ merge done
 ```
+注：发生了一件奇怪的事，同一批跑的数据，S 样本拼接的时候，竟然把三个不同基因拼成了一个基因，但是在 M 样本中却没事，why？？？？
 
 ## 7. 定量
 
@@ -369,7 +370,7 @@ echo ------ quantify finished
 
 python prepDE.py 会产生两个文件：gene/transcript_count_matrix.csv
 
-注：发生了一件奇怪的事，同一批跑的数据，S 样本拼接的时候，竟然把三个不同基因拼成了一个基因，但是在 M 样本中却没事，why？？？？
+
 
 **7.3 featurecounts 定量**
 
