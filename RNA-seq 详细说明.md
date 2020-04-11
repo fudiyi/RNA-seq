@@ -303,6 +303,12 @@ do
 done
 ```
 
+**5.3 TACO**
+
+**reference**： https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5199618/  
+
+注：在组装样本大于10个的时候，stringtie 和 cufflink 更容易将染色体上距离相近的基因组装为一个，推荐 TACO
+
 ## 6. 合并转录本
 
 ### cufflinks-cuffmerge 
@@ -328,7 +334,6 @@ echo ------ begin merge
 stringtie --merge -p 20 -G /data/FDY_analysis/Ara_gff_file/TAIR10.GFF3.genes.gff -o ${wkpath_N7_results}/results_bam/stringtie_gtf/stringtie_merged.gtf ${wkpath_N7_results}/results_bam/stringtie_gtf/mergelist.txt
 echo ------ merge done
 ```
-注：发生了一件奇怪的事，同一批跑的数据，S 样本拼接的时候，竟然把三个不同基因拼成了一个基因，但是在 M 样本中却没事，why？？？？
 
 ## 7. 定量
 
