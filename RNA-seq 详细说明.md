@@ -362,9 +362,14 @@ do
     stringtie -e -B -p 20 -G ${wkpath_N7_results}/results_bam/stringtie_gtf/stringtie_merged.gtf -o ${wkpath_N7_results}/results_bam/stringtie_gtf/ballgown/${sample_name}/${sample_name}.gtf ${wkpath_N7_results}/results_bam/${sample_name}.bam
 done
 echo ------ quantify finished
+
+
 ```
-结果说明：输出的结果在 bllgown 文件夹下，接下来可使用官方提供的 **ballgown** 进行差异；也可使用 **prepDE.py** 文件提取**原始 counts** 结合 DEseq2 进行
-差异分析 （推荐后者）
+结果说明：输出的结果在 bllgown 文件夹下，接下来可使用官方提供的 **ballgown** 进行差异；也可使用 **prepDE.py** 文件提取**原始 counts** 结合 DEseq2 进行差异分析 （推荐后者）
+
+python prepDE.py 会产生两个文件：gene/transcript_count_matrix.csv
+
+注：发生了一件奇怪的事，同一批跑的数据，S 样本拼接的时候，竟然把三个不同基因拼成了一个基因，但是在 M 样本中却没事，why？？？？
 
 **7.3 featurecounts 定量**
 
