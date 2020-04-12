@@ -148,7 +148,28 @@ ls *bam | while read id ;do (samtools flagstat -@ 10 $id > $(basename $id '.bam'
 
 ### 2.2 STAR
 
+**2.2.1 构建索引**
 
+```shell
+STAR --runThreadN 20 \ 
+--runMode genomeGenerate \ 
+--genomeDir ./ \
+--genomeFastaFiles /data/FDY_analysis/Arabidposis_index_hisat2/Arabidopsis_TAIR10_gene_JYX.fa \
+--sjdbGTFfile /data/FDY_analysis/Ara_gff_file/Araport11.gtf \
+--sjdbOverhang 149
+```
+--runThreadN: number of threads
+--runMode: genomeGenerate mode
+--genomeDir: /path/to/store/genome_indices
+--genomeFastaFiles: /path/to/FASTA_file
+--sjdbGTFfile: /path/to/GTF_file # 可选项，用于提高比对精确性
+--sjdbOverhang: readlength -1  # 注意为测序读长减1(PE)
+
+**2.2.2 比对**
+
+```shell
+
+```
 ## 3. 使用IGV查看bam文件
 
 **IGV 怎么用：** 
