@@ -160,6 +160,7 @@ ls *bam | while read id ;do (samtools flagstat -@ 10 $id > $(basename $id '.bam'
 STAR --runThreadN 20 \ 
 --runMode genomeGenerate \ 
 --genomeDir ./ \
+--genomeSAindexNbases 12 \ #改默认的14为12，不然很慢很慢（Arabidposis）
 --genomeFastaFiles /data/FDY_analysis/Arabidposis_index_hisat2/Arabidopsis_TAIR10_gene_JYX.fa \
 --sjdbGTFfile /data/FDY_analysis/Ara_gff_file/Araport11.gtf \ # 可选项，用于提高比对精确性
 --sjdbOverhang 149 # 注意为测序读长减1(PE)
@@ -437,8 +438,9 @@ reference： http://bioinf.wehi.edu.au/featureCounts/
 
 ```shell
 
-/data/software/subread-2.0.0-Linux-x86_64/bin/featureCounts -T 16 -p -s 1 -t exon 
--g transcript_id \
+/data/software/subread-2.0.0-Linux-x86_64/bin/featureCounts -T 16 -p -s 1 \
+-t transcript \ #使用转录本定量
+-g gene_id \ #需为唯一标记
 -a ./merged_asm/merged_cufflinks.gtf \
 -o all_counts_exon_strand_cufflink_gtf.txt *.bam
 ```
