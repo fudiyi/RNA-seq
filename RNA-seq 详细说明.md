@@ -31,21 +31,23 @@ https://genomebiology.biomedcentral.com/articles/10.1186/s13059-016-0881-8
 
 注：本文档使用的是**基因组比对**流程
 
-**A. 普通 RNA-Seq 分析**：步骤 1(质控) + 2(比对) + 7(定量) + 8(差异分析) 
-
-推荐：   hisat2 + featurecounts + DEseq2 或
-			       
-	kallisto + sleuth （无比对直接定量-transctiptome mapping）
-	----> reference：https://www.jianshu.com/p/5828d1d060aa ；https://www.jianshu.com/p/4601374fbb9f
-
-**B. 可变剪接分析**：步骤 1(质控) + 2(比对) + 10(可变剪接)
-
-		    推荐：STAR + rMATs
-
-**C. 预测新的转录本**：步骤 1(质控) + 2(比对) + 5(拼接转录本) + 6(合并转录本) + 7(定量) + 8(差异分析) + 9(预测转录本)
-
-		      推荐：STAR + TACO + featurecounts + DEseq2 + gffcompare
-
+**A. 普通 RNA-Seq 分析**
+```
+步骤 1(质控) + 2(比对) + 7(定量) + 8(差异分析) 
+推荐 hisat2 + featurecounts + DEseq2 或
+     kallisto + sleuth (无比对直接定量-transctiptome mapping) 
+     ----> reference：https://www.jianshu.com/p/5828d1d060aa ；https://www.jianshu.com/p/4601374fbb9f
+```
+**B. 可变剪接分析**
+```
+步骤 1(质控) + 2(比对) + 10(可变剪接)
+推荐：STAR + rMATs
+```
+**C. 预测新的转录本**
+```
+步骤 1(质控) + 2(比对) + 5(拼接转录本) + 6(合并转录本) + 7(定量) + 8(差异分析) + 9(预测转录本)
+推荐：STAR + TACO + featurecounts + DEseq2 + gffcompare
+```
 ### 数据样本：M,S,Col 此数据基本包括了所有转录本分析所需内容
 
 ### 数据类型：paired-end(双端), 150bp, 10×, fr-firststrand(链特异性建库 dUTP)
