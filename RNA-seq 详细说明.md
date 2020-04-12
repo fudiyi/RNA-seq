@@ -9,17 +9,17 @@
 
 **快速了解 RNA-seq是什么！**
 
-**RNA-seq 小故事**
+**1. RNA-seq 小故事**
 
-1. https://www.jianshu.com/p/d09e624efcab?utm_campaign=hugo&utm_medium=reader_share&utm_content=note&utm_source=weixin-friends
+https://www.jianshu.com/p/d09e624efcab?utm_campaign=hugo&utm_medium=reader_share&utm_content=note&utm_source=weixin-friends
 
-**测序原理**
+**2. 测序原理**
 
-2. https://zhuanlan.zhihu.com/p/20702684
+https://zhuanlan.zhihu.com/p/20702684
 
 注：所有本文用到的软件均在官网有详细说明
 
-**根据自己需求：从以下方法选择一种组合即可**
+### 根据自己需求：从以下方法选择一种组合即可
 
 **A. 普通 RNA-Seq 分析**：步骤 1(质控) + 2(比对) + 7(定量) + 8(差异分析)
 
@@ -28,7 +28,8 @@
 **C. 预测新的转录本**：步骤 1(质控) + 2(比对) + 5(拼接转录本) + 6(合并转录本) + 7(定量) + 8(差异分析) + 9(预测转录本)
 
 
-## 数据样本：M,S,Col 此数据基本包括了所有转录本分析所需内容
+### 数据样本：M,S,Col 此数据基本包括了所有转录本分析所需内容
+
 ### 数据类型：paired-end, 150bp, 10×， fr-firststrand(链特异性建库)
 
 **什么是单端测序和双端测序？**
@@ -74,13 +75,15 @@ multiqc *fastqc.zip --ignore *.html # 整合质控结果
 
 ## 2. 序列比对
 
-### hisat2(√) or STAR
+### hisat2 or STAR
 
 **比对工具的选择**：https://www.jianshu.com/p/681e02e7f9af
 
 **hisat2 怎么用**： https://daehwankimlab.github.io/hisat2/manual/
 
-**2.1	添加环境变量：（在首次安装软件之前需配置环境，包括fastqc）**
+**STAR**： https://hbctraining.github.io/Intro-to-rnaseq-hpc-O2/lessons/03_alignment.html
+
+**添加环境变量：（在首次安装软件之前需配置环境，包括fastqc）**
 
 **什么是环境变量：**
 
@@ -93,8 +96,9 @@ vi ~/.bashrc #永久修改环境变量，可直接调用 hisat2
 export PATH=/data/sly/tools/hisat2-2.0.4/hisat2:$PATH # 在 bashrc 中加入此命令
 source ~/.bashrc #使修改生效
 ```
+### 2.1 hisat2
 
-**2.2	构建索引：**
+**2.1.1 构建索引：**
 
 **why index**：高通量测序遇到的第一个问题就是，成千上万甚至上几亿条read如果在合理的时间内比对到参考基因组上，并且保证错误率在接受范围内。为了提高比对速度，就需要根据参考基因组序列，经过BWT算法转换成index，而我们比对的序列其实是index的一个子集。当然转录组比对还要考虑到可变剪切的情况，所以更加复杂。
 因此我们不是直接把read回贴到基因组上，而是把read和index进行比较
@@ -106,7 +110,7 @@ hisat2-build -p 10 Zea_mays.AGPv4.dna.toplevel.fa genome
 ```
 **什么是fa文件**：https://zh.wikipedia.org/wiki/FASTA%E6%A0%BC%E5%BC%8F
 
-**2.3	比对：**
+**2.2.2 比对：**
 
 初次进行比对时先尝试使用一组样本，再尝试批量比对
 
@@ -140,7 +144,10 @@ samtools view *.bam|less
 ```shell
 ls *bam | while read id ;do (samtools flagstat -@ 10 $id > $(basename $id '.bam').flagstat) ;done  # flagstat 统计比对率
 ```
-注：比对率高低只能说明样本纯度比较高，若比对率不高也不一定影响后续分析，有**足够数据量**就行
+注：比对率高低只能说明样本纯度高低，若比对率不高（也有可能是因为 Ref 的问题，如玉米自交系很多但参考基因组很少）也不一定影响后续分析，有**足够数据量**就行
+
+### 2.2 STAR
+
 
 ## 3. 使用IGV查看bam文件
 
@@ -268,7 +275,7 @@ echo finished
 
 在**预测新的lncRNA时**常常需要进行转录本拼接，因为在参考 TAIR10 gff文件中并没有关于lncRNA的全部注释
 
-### cufflink or stringtie
+### cufflink or stringtie or TACO
 
 **cufflink**： http://cole-trapnell-lab.github.io/cufflinks/
 
