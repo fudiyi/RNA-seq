@@ -47,6 +47,23 @@ fr-secondstrand 保留第二条链的方法，如 Ligation, Standard SOLiD
 
 https://www.jianshu.com/p/a63595a41bed
 
+
+#### 若是链特异性数据，各个软件参数设置如下 （重要）
+
+|                                      | forward (transcript)                 | reverse (rev comp of transcript)     |
+|:-------------------------------------|:-------------------------------------|:-------------------------------------|
+| TopHat/Cufflinks `--library-type`    | `fr-secondstrand`                    | `fr-firststrand`                     |
+| STAR                                 | 1st read strand                      | 2nd read strand                      |
+| Picard CollectRnaSeqMetrics `STRAND_SPECIFICITY` | `FIRST_READ_TRANSCRIPTION_STRAND` | `SECOND_READ_TRANSCRIPTION_STRAND` |
+| htseq-count `-s/--stranded`          | `yes`                                | `reverse`                            |
+| subread featureCounts `-s`           | `1`                                  | `2`                                  |
+| RSEM `--forward-prob`                | `1`                                  | `0`                                  |
+| Salmon/Sailfish `--libType`          | `SF`/`ISF`                           | `SR`/`ISR`                           |
+| HISAT2 `--rna-strandness`            | `FR` (`F` for single-end)            | `RF` (`R` for single-end)            |
+| Library Kit                          | Illumina ScriptSeq                   | Illumina TruSeq Stranded Total RNA   |
+
+
+
 此套数据目的之一是为了**预测拟南芥基因组上lncRNA**，lncRNA大多数处于基因的反义链上，所以在建库的时候使用了**ssRNA-Seq**，若无此需求使用普通建库即可
 
 **什么是lncRNA**：https://en.wikipedia.org/wiki/Long_non-coding_RNA
@@ -434,22 +451,16 @@ python prepDE.py 会产生两个文件：gene/transcript_count_matrix.csv
 
 **7.3 featurecounts 定量**
 
-reference： http://bioinf.wehi.edu.au/featureCounts/
+**reference**： http://bioinf.wehi.edu.au/featureCounts/
 
 ```shell
 
-/data/software/subread-2.0.0-Linux-x86_64/bin/featureCounts -T 16 -p -s 1 \
+/data/software/subread-2.0.0-Linux-x86_64/bin/featureCounts -T 16 -p -s 2 \
 -t exon \ 
 -g gene_id \ #需为唯一标记
 -a ./merged_asm/merged_cufflinks.gtf \
 -o all_counts_exon_strand_cufflink_gtf.txt *.bam
 ```
--s 参数：
-0 (unstranded) 非链特异性
-
-1 (stranded) 对应 fr-firststrand 
-
-2 (reversely stranded) 对应 fr-secondstrand
 
 
 ## 8. 差异分析
