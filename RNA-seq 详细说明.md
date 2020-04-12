@@ -30,7 +30,7 @@ https://zhuanlan.zhihu.com/p/20702684
 
 ### 数据样本：M,S,Col 此数据基本包括了所有转录本分析所需内容
 
-### 数据类型：paired-end, 150bp, 10×， fr-firststrand(链特异性建库)
+### 数据类型：paired-end, 150bp, 10×， fr-firststrand(链特异性建库 dUTP)
 
 **什么是单端测序和双端测序？**
 
@@ -38,6 +38,12 @@ https://www.illumina.com/science/technology/next-generation-sequencing/plan-expe
 
 
 **什么是链特异性建库？**
+
+fr-unstranded 适用于非链特异性建库，是标准的illumina建库方法；
+
+fr-firststrand 保留第一条链的方法，如 **dUTP**, NSR, NNSR；
+
+fr-secondstrand 保留第二条链的方法，如 Ligation, Standard SOLiD
 
 https://www.jianshu.com/p/a63595a41bed
 
@@ -136,7 +142,7 @@ done
 **查看bam文件**
 
 ```shell
-samtools view *.bam|less
+samtools view *.bam|less 
 ```
 
 **什么是bam文件**：https://hbctraining.github.io/Intro-to-rnaseq-hpc-O2/lessons/04_alignment_quality.html
@@ -178,8 +184,7 @@ do
 	--outBAMsortingThreadN 8
 done
 ```
-注：--outWigType 还可输出wig文件
-
+注：1. --outWigType 可输出wig文件；2.  --outSAMstrandField 若为 unstranded RNA-seq data，需设置此参数，若为 **stranded RNA-seq data,无需做任何改动，但是在后续转录组组装时需要使用对应参数指定链特异性**
 
 ## 3. 使用IGV查看bam文件
 
@@ -320,7 +325,8 @@ echo finished
 for i in `ls *.bam`
 do
     sample_name=${i%%_*} #拿掉变量i的第一个 _ 及其右边的字符串
-    cufflinks -p 12 -u --library-type fr-firststrand 
+    cufflinks -p 12 \
+    -u --library-type fr-firststrand #若为链特异性数据需设定该参数
     -b /data/FDY_analysis/Arabidposis_index_hisat2/Arabidopsis_TAIR10_gene_JYX.fa \
     -g /data/FDY_analysis/Ara_gff_file/TAIR10.GFF3.genes.gff \
     -o ./cufflink_all/${sample_name} $i
@@ -337,7 +343,10 @@ for i in `ls ${wkpath_N7_results}/results_bam/*.bam`
 do
     sample_name=`basename $i .bam`
     echo ------- start stringtie ${sample_name}
-    stringtie ${wkpath_N7_results}/results_bam/${sample_name}.bam -p 20 -G /data/FDY_analysis/Ara_gff_file/TAIR10.GFF3.genes.gff -o ${wkpath_N7_results}/results_bam/stringtie_gtf/${sample_name}_stringtie.gtf
+    stringtie ${wkpath_N7_results}/results_bam/${sample_name}.bam -p 20 \
+    --rf \ #若为链特异性数据需设定该参数
+    -G /data/FDY_analysis/Ara_gff_file/TAIR10.GFF3.genes.gff \
+    -o ${wkpath_N7_results}/results_bam/stringtie_gtf/${sample_name}_stringtie.gtf
     echo ------ finish ${sample_name} pinjie
 done
 ```
@@ -374,7 +383,9 @@ echo ------ merge done
 **reference**： https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5199618/  
 
 ```shell
-$ ./taco_run <options> <gtf_files.txt>
+taco_run -p 8 -o ./TACO_results ./s_mergelist.txt # meta-assembly
+taco_refcomp -p 12 -o ./refcomp_results -r /data/FDY_analysis/Ara_gff_file/TAIR10.GFF3.genes.gtf -t ./TACO_resu
+lts/assembly.gtf #This tool can take any assembly in GTF format and compare to a reference, and provide details on overlap with reference transcripts, nature of that overlap, and can also run the CPAT tool to determine coding potential
 ```
 注：在组装样本大于10个的时候，**stringtie 和 cufflink 更容易将染色体上距离相近的基因组装为一个**，推荐 TACO
 
@@ -388,7 +399,7 @@ $ ./taco_run <options> <gtf_files.txt>
 ```shell
 cuffdiff -o diffout_all -p 12 
 -b /data/FDY_analysis/Arabidposis_index_hisat2/Arabidopsis_TAIR10_gene_JYX.fa \
---library-type fr-firststrand \
+--library-type fr-firststrand \ #若为链特异性数据需设定该参数
 -L col-0,col-3,col-24,mac-0,mac-3,mac-24,skip-0,skip-3,skip-24 \
 -u ./merged_asm/merged.gtf \
 Col-1-0_368368_all.hisat2.bam,Col-2-0_371371_all.hisat2.bam 
@@ -408,11 +419,11 @@ echo ------ begin quantify
 for i in `ls ${wkpath_N7_results}/results_bam/*.bam`
 do
     sample_name=`basename $i .bam`
-    stringtie -e -B -p 20 -G ${wkpath_N7_results}/results_bam/stringtie_gtf/stringtie_merged.gtf -o ${wkpath_N7_results}/results_bam/stringtie_gtf/ballgown/${sample_name}/${sample_name}.gtf ${wkpath_N7_results}/results_bam/${sample_name}.bam
+    stringtie -e -B --rf \#若为链特异性数据需设定该参数
+    -p 20 -G ${wkpath_N7_results}/results_bam/stringtie_gtf/stringtie_merged.gtf \
+    -o ${wkpath_N7_results}/results_bam/stringtie_gtf/ballgown/${sample_name}/${sample_name}.gtf ${wkpath_N7_results}/results_bam/${sample_name}.bam
 done
 echo ------ quantify finished
-
-
 ```
 结果说明：输出的结果在 bllgown 文件夹下，接下来可使用官方提供的 **ballgown** 进行差异；也可使用 **prepDE.py** 文件提取**原始 counts** 结合 DEseq2 进行差异分析 （推荐后者）
 
@@ -431,7 +442,10 @@ reference： http://bioinf.wehi.edu.au/featureCounts/
 -a ./merged_asm/merged_cufflinks.gtf \
 -o all_counts_exon_strand_cufflink_gtf.txt *.bam
 ```
-
+-s 参数：
+0 (unstranded) 非链特异性
+1 (stranded) 对应 fr-firststrand 
+2 (reversely stranded) 对应 fr-secondstrand
 
 
 ## 8. 差异分析
