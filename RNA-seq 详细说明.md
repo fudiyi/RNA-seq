@@ -439,14 +439,16 @@ reference： http://bioinf.wehi.edu.au/featureCounts/
 ```shell
 
 /data/software/subread-2.0.0-Linux-x86_64/bin/featureCounts -T 16 -p -s 1 \
--t transcript \ #使用转录本定量
+-t exon \ 
 -g gene_id \ #需为唯一标记
 -a ./merged_asm/merged_cufflinks.gtf \
 -o all_counts_exon_strand_cufflink_gtf.txt *.bam
 ```
 -s 参数：
 0 (unstranded) 非链特异性
+
 1 (stranded) 对应 fr-firststrand 
+
 2 (reversely stranded) 对应 fr-secondstrand
 
 
@@ -599,6 +601,7 @@ gffread my.gff3 -T -o my.gtf
 # gtf to gff
 gffread merged.gtf -o- > merged.gff3
 ```
+**gtf与gff的区别**：https://www.jianshu.com/p/48b5a0972301 ； http://www.biotrainee.com/thread-2705-1-1.html
 
 **筛选 lncRNA**
 
