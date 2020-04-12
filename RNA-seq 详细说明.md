@@ -307,7 +307,7 @@ echo finished
 
 在**预测新的lncRNA时**常常需要进行转录本拼接，因为在参考 TAIR10 gff文件中并没有关于lncRNA的全部注释
 
-### cufflink or stringtie or TACO
+### cufflink or stringtie
 
 **cufflink**： http://cole-trapnell-lab.github.io/cufflinks/
 
@@ -342,15 +342,11 @@ do
 done
 ```
 
-**5.3 TACO**
 
-**reference**： https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5199618/  
-
-注：在组装样本大于10个的时候，stringtie 和 cufflink 更容易将染色体上距离相近的基因组装为一个，推荐 TACO
 
 ## 6. 合并转录本
 
-### cufflinks-cuffmerge 
+### 6.1 cufflinks -cuffmerge 
 
 ```shell
 cuffmerge -p 12 
@@ -364,7 +360,7 @@ cuffmerge -p 12
 
 `results: merged_cufflinks.gff`
 
-### stringtie --merge
+### 6.2 stringtie --merge
 
 ```shell
 echo ------ create a gtf list
@@ -373,6 +369,14 @@ echo ------ begin merge
 stringtie --merge -p 20 -G /data/FDY_analysis/Ara_gff_file/TAIR10.GFF3.genes.gff -o ${wkpath_N7_results}/results_bam/stringtie_gtf/stringtie_merged.gtf ${wkpath_N7_results}/results_bam/stringtie_gtf/mergelist.txt
 echo ------ merge done
 ```
+### 6.3 TACO
+
+**reference**： https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5199618/  
+
+```shell
+$ ./taco_run <options> <gtf_files.txt>
+```
+注：在组装样本大于10个的时候，**stringtie 和 cufflink 更容易将染色体上距离相近的基因组装为一个**，推荐 TACO
 
 ## 7. 定量
 
