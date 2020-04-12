@@ -9,7 +9,7 @@
 
 **快速了解 RNA-seq是什么！**
 
-**1. RNA-seq 小故事**
+**1. 简单了解 RNA-seq**
 
 https://www.jianshu.com/p/d09e624efcab?utm_campaign=hugo&utm_medium=reader_share&utm_content=note&utm_source=weixin-friends
 
@@ -17,20 +17,39 @@ https://www.jianshu.com/p/d09e624efcab?utm_campaign=hugo&utm_medium=reader_share
 
 https://zhuanlan.zhihu.com/p/20702684
 
-注：所有本文用到的软件均在官网有详细说明
+**3. 深入了解 RNA-seq**
 
-### 根据自己需求：从以下方法选择一种组合即可
+https://www.jianshu.com/p/679508de0f16
 
-**A. 普通 RNA-Seq 分析**：步骤 1(质控) + 2(比对) + 7(定量) + 8(差异分析)
+注：所有本文用到的软件均在官网有详细说明，使用时优先看**官网说明**，其它供参考
+
+### 根据自己需求，选择合适的方法
+
+#### 工具的选择
+
+https://genomebiology.biomedcentral.com/articles/10.1186/s13059-016-0881-8 【基因组比对 or 转录组比对】-有参考基因组
+
+注意 本文使用的是**基因组比对**流程
+
+**A. 普通 RNA-Seq 分析**：
+
+步骤 1(质控) + 2(比对) + 7(定量) + 8(差异分析)  # 若是只想看已知转录本差异，完全可以使用 **transcriptome mapping**流程
+
+推荐：hisat2 + featurecounts + DEseq2 或
+			       
+kallisto + sleuth （无比对直接定量） ----> reference：https://www.jianshu.com/p/5828d1d060aa ；https://www.jianshu.com/p/4601374fbb9f
 
 **B. 可变剪接分析**：步骤 1(质控) + 2(比对) + 10(可变剪接)
 
+推荐：STAR + rMATs
+
 **C. 预测新的转录本**：步骤 1(质控) + 2(比对) + 5(拼接转录本) + 6(合并转录本) + 7(定量) + 8(差异分析) + 9(预测转录本)
 
+推荐：STAR + TACO + featurecounts + DEseq2 + gffcompare
 
 ### 数据样本：M,S,Col 此数据基本包括了所有转录本分析所需内容
 
-### 数据类型：paired-end, 150bp, 10×， fr-firststrand(链特异性建库 dUTP)
+### 数据类型：paired-end(双端), 150bp, 10×, fr-firststrand(链特异性建库 dUTP)
 
 **什么是单端测序和双端测序？**
 
@@ -73,6 +92,9 @@ https://www.jianshu.com/p/a63595a41bed
 
 **什么是fq文件**：https://support.illumina.com/bulletins/2016/04/fastq-files-explained.html
 
+
+# 分析流程（genome mapping）
+
 ## 1. 质控
 在进行数据分析之前需要对下机数据进行质检，目的是为了判断数据是否达标，大部分公司返回的测序数据为**Cleandata（已去接头）**，质量均不错
 
@@ -99,8 +121,6 @@ multiqc *fastqc.zip --ignore *.html # 整合质控结果
 ## 2. 序列比对
 
 ### hisat2 or STAR
-
-**比对工具的选择**：https://www.jianshu.com/p/681e02e7f9af
 
 **hisat2 怎么用**： https://daehwankimlab.github.io/hisat2/manual/
 
@@ -504,7 +524,11 @@ dim(diff_gene_deseq2_res_n0_vs_c0)
 head(diff_gene_deseq2_res_n0_vs_c0)
 write.csv(diff_gene_deseq2_res_n0_vs_c0,file= "DEG_n0_vs_c0.csv")
 ```
+若要对**lncRNA进行差异分析**，建议两种方法: 
 
+1. 使用基因组比对后用featurecounts计数，然后根据class_code分别挑选mRNA和lncRNA进行差异分析
+
+2. 进行转录组比对，先mapping到mRNA上，不能mapping的单独做一个fasta，再比对到lncRNA计算表达量
 
 
 **8.1.1	差异基因可视化**
