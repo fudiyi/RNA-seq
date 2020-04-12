@@ -98,7 +98,7 @@ source ~/.bashrc #使修改生效
 ```
 ### 2.1 hisat2
 
-**2.1.1 构建索引：**
+**2.1.1 构建索引**
 
 **why index**：高通量测序遇到的第一个问题就是，成千上万甚至上几亿条read如果在合理的时间内比对到参考基因组上，并且保证错误率在接受范围内。为了提高比对速度，就需要根据参考基因组序列，经过BWT算法转换成index，而我们比对的序列其实是index的一个子集。当然转录组比对还要考虑到可变剪切的情况，所以更加复杂。
 因此我们不是直接把read回贴到基因组上，而是把read和index进行比较
@@ -110,7 +110,7 @@ hisat2-build -p 10 Zea_mays.AGPv4.dna.toplevel.fa genome
 ```
 **什么是fa文件**：https://zh.wikipedia.org/wiki/FASTA%E6%A0%BC%E5%BC%8F
 
-**2.2.2 比对：**
+**2.2.2 比对**
 
 初次进行比对时先尝试使用一组样本，再尝试批量比对
 
@@ -155,21 +155,32 @@ STAR --runThreadN 20 \
 --runMode genomeGenerate \ 
 --genomeDir ./ \
 --genomeFastaFiles /data/FDY_analysis/Arabidposis_index_hisat2/Arabidopsis_TAIR10_gene_JYX.fa \
---sjdbGTFfile /data/FDY_analysis/Ara_gff_file/Araport11.gtf \
---sjdbOverhang 149
+--sjdbGTFfile /data/FDY_analysis/Ara_gff_file/Araport11.gtf \ # 可选项，用于提高比对精确性
+--sjdbOverhang 149 # 注意为测序读长减1(PE)
 ```
---runThreadN: number of threads
---runMode: genomeGenerate mode
---genomeDir: /path/to/store/genome_indices
---genomeFastaFiles: /path/to/FASTA_file
---sjdbGTFfile: /path/to/GTF_file # 可选项，用于提高比对精确性
---sjdbOverhang: readlength -1  # 注意为测序读长减1(PE)
 
 **2.2.2 比对**
 
 ```shell
+#!/usr/bin/env bash
 
+wkpath_rawdata=/data/FDY_analysis/RNA_seq/FDY/mac3ab/rawdata/cleandata
+wkpath_results=/data/FDY_analysis/RNA_seq/FDY/mac3ab/rawdata/STAR_TACO_featurecounts
+
+for i in $(ls ${wkpath_rawdata}/*.R1.fastq.gz|grep -E 'Col|S')
+do
+	sample_name=`basename $i .R1.fastq.gz`
+	STAR --genomeDir /data/FDY_analysis/Ara_star_index --runThreadN 16 \
+	--readFilesIn ${wkpath_rawdata}/${sample_name}.R1.fastq.gz ${wkpath_rawdata}/${sample_name}.R2.fastq.gz \
+	--readFilesCommand zcat \ #若为.gz文件需加此命令
+	--outFileNamePrefix ${wkpath_results}/${sample_name} \
+	--outSAMtype BAM SortedByCoordinate \ #输出为bam并排序
+	--outBAMsortingThreadN 8
+done
 ```
+注：--outWigType 还可输出wig文件
+
+
 ## 3. 使用IGV查看bam文件
 
 **IGV 怎么用：** 
