@@ -2,7 +2,9 @@
 
 # RNA-seq	procedure	for	Yanglab
 
-## 如果没有相关RNA-seq分析基础，请先参考以下两篇经典文章
+# 背景知识
+
+### 如果没有相关RNA-seq分析基础，请先参考以下两篇经典文章
 
 1. tophat + cufflink: https://www.ncbi.nlm.nih.gov/pubmed/22383036
 2. hisat2 + stringtie: https://www.ncbi.nlm.nih.gov/pubmed/?term=Transcript-level+expression+analysis+of+RNA-seq+experiments+with+HISAT%2C+StringTie+and+Ballgown
@@ -94,7 +96,7 @@ https://www.jianshu.com/p/a63595a41bed
 **什么是fq文件**：https://support.illumina.com/bulletins/2016/04/fastq-files-explained.html
 
 
-# 分析流程（genome mapping）
+# 分析流程（Genome mapping）
 
 ## 1. 质控
 在进行数据分析之前需要对下机数据进行质检，目的是为了判断数据是否达标，大部分公司返回的测序数据为**Cleandata（已去接头）**，质量均不错
