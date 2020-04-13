@@ -4,9 +4,10 @@
 
 # 背景知识
 
-### 如果没有相关RNA-seq分析基础，请先参考以下两篇经典文章
+### 如果没有相关RNA-seq分析基础，请先参考以下两个经典流程 (Genome mapping)
 
 1. tophat + cufflink: https://www.ncbi.nlm.nih.gov/pubmed/22383036
+
 2. hisat2 + stringtie: https://www.ncbi.nlm.nih.gov/pubmed/?term=Transcript-level+expression+analysis+of+RNA-seq+experiments+with+HISAT%2C+StringTie+and+Ballgown
 
 **快速了解 RNA-seq是什么！**
@@ -23,15 +24,29 @@ https://zhuanlan.zhihu.com/p/20702684
 
 https://www.jianshu.com/p/679508de0f16
 
+https://www.ncbi.nlm.nih.gov/pubmed/31341269 **(RNA-seq 重磅综述，必读)**
+
 注：所有本文用到的软件均在官网有详细说明，使用时优先看**官网说明**，其它供参考
 
 ### 根据自己需求，选择合适的方法
 
 #### 工具的选择
 
-https://genomebiology.biomedcentral.com/articles/10.1186/s13059-016-0881-8 
+https://www.nature.com/articles/s41467-017-00050-4 **（必看）**
 
-注：本文档使用的是**基因组比对**流程
+https://genomebiology.biomedcentral.com/articles/10.1186/s13059-016-0881-8 **（必看）**
+
+#### 部分工具汇总
+
+|Alignment    |Reference-based transcript assembly |de novo transcript assembly   |quantification      |Differential expression    |
+|:------------|:-----------------------------------|:-----------------------------|:-------------------|:--------------------------|
+|tophat       |cufflink       			   |Trinity       		  |kallisto    	       |DESeq2      		   |
+|hisat2       |                 	 	   |Oases          		  |Sailfish            |edgeR         		   |
+|STAR         |                			   |SOAPdenovoTrans|Salmon        |featureCounts       |limma			   |
+|RASER        |stringtie      			   |Trimmomatic    		  |                    |Cuffdiff                   |  
+|             |              			   |               		  |                    |Ballgown                   |
+|             |             			   |               		  |                    |sleuth                     |
+
 
 **A. 普通 RNA-Seq 分析**
 ```
@@ -43,12 +58,12 @@ https://genomebiology.biomedcentral.com/articles/10.1186/s13059-016-0881-8
 **B. 可变剪接分析**
 ```
 步骤 1(质控) + 2(比对) + 10(可变剪接)
-推荐：STAR + rMATs
+推荐 STAR + rMATs
 ```
 **C. 预测新的转录本**
 ```
 步骤 1(质控) + 2(比对) + 5(拼接转录本) + 6(合并转录本) + 7(定量) + 8(差异分析) + 9(预测转录本)
-推荐：STAR + TACO + featurecounts + DEseq2 + gffcompare
+推荐 STAR + cufflink/stringtie + TACO + featurecounts + DEseq2 + gffcompare
 ```
 ### 数据样本：M,S,Col 此数据基本包括了所有转录本分析所需内容
 
@@ -90,13 +105,14 @@ https://www.jianshu.com/p/a63595a41bed
 
 **什么是lncRNA**：https://en.wikipedia.org/wiki/Long_non-coding_RNA
 
-`rawdata: Col-1-0_368368_all.R1.fastq.gz;Col-1-0_368368_all.R2.fastq.gz 
- #双端测序是在两端设计引物进行测序，因此有R1,R2两个fq文件`
+`rawdata: Col-1-0_368368_all.R1.fastq.gz;Col-1-0_368368_all.R2.fastq.gz` 
+ 双端测序是在两端设计引物进行测序，因此**一个样本**有**R1,R2**两个fq文件
 
 **什么是fq文件**：https://support.illumina.com/bulletins/2016/04/fastq-files-explained.html
 
 
-# 分析流程（Genome mapping）
+
+# Ⅰ. Genome mapping 
 
 ## 1. 质控
 在进行数据分析之前需要对下机数据进行质检，目的是为了判断数据是否达标，大部分公司返回的测序数据为**Cleandata（已去接头）**，质量均不错
@@ -152,7 +168,7 @@ source ~/.bashrc #使修改生效
 **reference**： http://www.biotrainee.com/thread-26-1-1.html
 
 ```shell
-hisat2-build -p 10 Zea_mays.AGPv4.dna.toplevel.fa genome
+hisat2-build -p 10 Zea_mays.AGPv4.dna.toplevel.fa genome #fa为基因组序列文件
 ```
 **什么是fa文件**：https://zh.wikipedia.org/wiki/FASTA%E6%A0%BC%E5%BC%8F
 
@@ -529,9 +545,9 @@ write.csv(diff_gene_deseq2_res_n0_vs_c0,file= "DEG_n0_vs_c0.csv")
 ```
 若要对**lncRNA进行差异分析**，建议两种方法: 
 
-1. 使用基因组比对后用featurecounts计数，然后根据class_code分别挑选mRNA和lncRNA进行差异分析
+1. 使用**基因组比对**后用featurecounts计数，然后根据class_code分别挑选mRNA和lncRNA进行差异分析
 
-2. 进行转录组比对，先mapping到mRNA上，不能mapping的单独做一个fasta，再比对到lncRNA计算表达量
+2. 进行**转录组比对**，先mapping到mRNA上，不能mapping的单独做一个fq，再比对基因组去计算lncRNA表达量
 
 
 **8.1.1	差异基因可视化**
@@ -704,20 +720,9 @@ reference： http://rnaseq-mats.sourceforge.net/
 ```shell
 for i in {0,3,24}
 do
-	python2.7 /data/FDY_analysis/tools/rMATS.4.0.2/rMATS-turbo-Linux-UCS4/rmats.py --b1 col_${i}.txt --b2 mac_${i}.txt --gtf /data/FDY_analys
-is/RNA_seq/FDY/mac3ab/rawdata/hisat2_results_for_cufflink/results_bam/merged_asm/merged.gtf --od rMATs/col_mac_${i} -t paired --readLength 150 --cstat 0.01 --nthread 8 --libType fr-firststrand
-	python2.7 /data/FDY_analysis/tools/rMATS.4.0.2/rMATS-turbo-Linux-UCS4/rmats.py --b1 col_${i}.txt --b2 skip_${i}.txt --gtf /data/FDY_analy
-sis/RNA_seq/FDY/mac3ab/rawdata/hisat2_results_for_cufflink/results_bam/merged_asm/merged.gtf --od rMATs/col_skip_${i} -t paired --readLength 150 --cstat 0.01 --nthread 8 --libType fr-firststrand
-done
-
-for j in {col,mac,skip}
-do
-	python2.7 /data/FDY_analysis/tools/rMATS.4.0.2/rMATS-turbo-Linux-UCS4/rmats.py --b1 ${j}_0.txt --b2 ${j}_3.txt --gtf /data/FDY_analysis/R
-NA_seq/FDY/mac3ab/rawdata/hisat2_results_for_cufflink/results_bam/merged_asm/merged.gtf --od rMATs/${j}_0_3 -t paired --readLength 150 --cstat 0.01 --nthread 8 --libType fr-firststrand
-	python2.7 /data/FDY_analysis/tools/rMATS.4.0.2/rMATS-turbo-Linux-UCS4/rmats.py --b1 ${j}_0.txt --b2 ${j}_24.txt --gtf /data/FDY_analysis/
-RNA_seq/FDY/mac3ab/rawdata/hisat2_results_for_cufflink/results_bam/merged_asm/merged.gtf --od rMATs/${j}_0_24 -t paired --readLength 150 --cstat 0.01 --nthread 8 --libType fr-firststrand
-	python2.7 /data/FDY_analysis/tools/rMATS.4.0.2/rMATS-turbo-Linux-UCS4/rmats.py --b1 ${j}_3.txt --b2 ${j}_24.txt --gtf /data/FDY_analysis/
-RNA_seq/FDY/mac3ab/rawdata/hisat2_results_for_cufflink/results_bam/merged_asm/merged.gtf --od rMATs/${j}_3_24 -t paired --readLength 150 --cstat 0.01 --nthread 8 --libType fr-firststrand
+	python2.7 /data/FDY_analysis/tools/rMATS.4.0.2/rMATS-turbo-Linux-UCS4/rmats.py --b1 col_${i}.txt --b2 m_${i}.txt --gtf /data/FDY_analysis/RNA_seq/FDY/m/rawdata/hisat2_results_for_cufflink/results_bam/merged_asm/merged.gtf --od rMATs/col_m_${i} -t paired --readLength 150 --cstat 0.01 --nthread 8 --libType fr-firststrand
+	python2.7 /data/FDY_analysis/tools/rMATS.4.0.2/rMATS-turbo-Linux-UCS4/rmats.py --b1 col_${i}.txt --b2 s_${i}.txt --gtf /data/FDY_analy
+sis/RNA_seq/FDY/m/rawdata/hisat2_results_for_cufflink/results_bam/merged_asm/merged.gtf --od rMATs/col_s_${i} -t paired --readLength 150 --cstat 0.01 --nthread 8 --libType fr-firststrand
 done
 ```
 
@@ -727,7 +732,7 @@ done
 library(upsetR)
 data <- read.table("data_all.txt")
 between <- function(row, min, max){
-     newData <- (row["RI_in_mac"] < max) & (row["RI_in_mac"] > min)
+     newData <- (row["RI_in_mac"] < max) & (row["RI_in_m"] > min)
 }
 
 	upset(data_all_RI,sets=c("RI_0_3","SE_0_3","A3SS_0_3","A5SS_0_3","MXE_0_3","RI_3_24","SE_3_24","A3SS_3_24","A5SS_3_24","MXE_3_24","RI_0_24","SE_0_24","A3SS_0_24","A5SS_0_24","MXE_0_24"),order.by = "freq",keep.order = TRUE,mainbar.y.label = "Gene Intersections", sets.x.label = "Splicing Form", mb.ratio = c(0.6, 0.4), 
@@ -747,3 +752,12 @@ upset(movies, queries = list(list(query = intersects, params = list("Drama",
     params = list("Action", "Drama"), active = T)))
 ```
 
+# Ⅰ. Transcriptome mapping 
+
+与 Genome mapping 不同的是比对到转录组（cdna.fa）上，目前理解如下：
+
+1. 若是普通 RNA-Seq，只在意已知转录本的差异表达使用这种方式十分方便，如之前推荐的 kallisto + sleuth
+
+2. 这种方式不用处理可变剪接问题，但也不能发现新的转录本
+
+3. 了解到预测lncRNA可以把reads先比对到mRNA上，把剩下的未比对的重新做成fq文件，然后比对到基因组
