@@ -41,9 +41,9 @@ https://genomebiology.biomedcentral.com/articles/10.1186/s13059-016-0881-8 **（
 |Alignment    |Reference-based transcript assembly |de novo transcript assembly   |quantification      |Differential expression    |
 |:------------|:-----------------------------------|:-----------------------------|:-------------------|:--------------------------|
 |tophat       |cufflink       			   |Trinity       		  |kallisto    	       |DESeq2      		   |
-|hisat2       |                 	 	   |Oases          		  |Sailfish            |edgeR         		   |
+|hisat2       |stringtie                  	   |Oases          		  |Sailfish            |edgeR         		   |
 |STAR         |                			   |SOAPdenovoTrans|Salmon        |featureCounts       |limma			   |
-|RASER        |stringtie      			   |Trimmomatic    		  |                    |Cuffdiff                   |  
+|RASER        |     			           |Trimmomatic    		  |                    |Cuffdiff                   |  
 |             |              			   |               		  |                    |Ballgown                   |
 |             |             			   |               		  |                    |sleuth                     |
 
@@ -112,7 +112,7 @@ https://www.jianshu.com/p/a63595a41bed
 
 
 
-# Ⅰ. Genome mapping 
+# Genome mapping 
 
 ## 1. 质控
 在进行数据分析之前需要对下机数据进行质检，目的是为了判断数据是否达标，大部分公司返回的测序数据为**Cleandata（已去接头）**，质量均不错
@@ -752,7 +752,7 @@ upset(movies, queries = list(list(query = intersects, params = list("Drama",
     params = list("Action", "Drama"), active = T)))
 ```
 
-# Ⅰ. Transcriptome mapping 
+# Transcriptome mapping 
 
 与 Genome mapping 不同的是比对到转录组（cdna.fa）上，目前理解如下：
 
