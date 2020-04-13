@@ -106,13 +106,14 @@ https://www.jianshu.com/p/a63595a41bed
 **什么是lncRNA**：https://en.wikipedia.org/wiki/Long_non-coding_RNA
 
 `rawdata: Col-1-0_368368_all.R1.fastq.gz;Col-1-0_368368_all.R2.fastq.gz` 
+
  双端测序是在两端设计引物进行测序，因此**一个样本**有**R1,R2**两个fq文件
 
 **什么是fq文件**：https://support.illumina.com/bulletins/2016/04/fastq-files-explained.html
 
 
 
-# Genome mapping 
+# A. Genome mapping 
 
 ## 1. 质控
 在进行数据分析之前需要对下机数据进行质检，目的是为了判断数据是否达标，大部分公司返回的测序数据为**Cleandata（已去接头）**，质量均不错
@@ -752,7 +753,7 @@ upset(movies, queries = list(list(query = intersects, params = list("Drama",
     params = list("Action", "Drama"), active = T)))
 ```
 
-# Transcriptome mapping 
+# B. Transcriptome mapping 
 
 与 Genome mapping 不同的是比对到转录组（cdna.fa）上，目前理解如下：
 
