@@ -42,8 +42,8 @@ https://genomebiology.biomedcentral.com/articles/10.1186/s13059-016-0881-8 **（
 |:------------|:-----------------------------------|:-----------------------------|:-------------------|:--------------------------|
 |tophat       |cufflink       			   |Trinity       		  |kallisto    	       |DESeq2      		   |
 |hisat2       |stringtie                  	   |Oases          		  |Sailfish            |edgeR         		   |
-|STAR         |                			   |SOAPdenovoTrans|Salmon        |featureCounts       |limma			   |
-|RASER        |     			           |Trimmomatic    		  |                    |Cuffdiff                   |  
+|STAR         |                			   |SOAPdenovoTrans               |featureCounts       |limma			   |
+|RASER        |     			           |Trimmomatic    		  |Salmon              |Cuffdiff                   |  
 |             |              			   |               		  |                    |Ballgown                   |
 |             |             			   |               		  |                    |sleuth                     |
 
@@ -63,7 +63,7 @@ https://genomebiology.biomedcentral.com/articles/10.1186/s13059-016-0881-8 **（
 **C. 预测新的转录本**
 ```
 步骤 1(质控) + 2(比对) + 5(拼接转录本) + 6(合并转录本) + 7(定量) + 8(差异分析) + 9(预测转录本)
-推荐 STAR + cufflink/stringtie + TACO + featurecounts + DEseq2 + gffcompare
+推荐 STAR + cufflink + TACO + featurecounts + DEseq2 + gffcompare
 ```
 ### 数据样本：M,S,Col 此数据基本包括了所有转录本分析所需内容
 
@@ -161,7 +161,7 @@ source ~/.bashrc #使修改生效
 ```
 ### 2.1 hisat2
 
-**2.1.1 构建索引**
+**2.1.1 构建基因组索引**
 
 **why index**：高通量测序遇到的第一个问题就是，成千上万甚至上几亿条read如果在合理的时间内比对到参考基因组上，并且保证错误率在接受范围内。为了提高比对速度，就需要根据参考基因组序列，经过BWT算法转换成index，而我们比对的序列其实是index的一个子集。当然转录组比对还要考虑到可变剪切的情况，所以更加复杂。
 因此我们不是直接把read回贴到基因组上，而是把read和index进行比较
@@ -762,3 +762,13 @@ upset(movies, queries = list(list(query = intersects, params = list("Drama",
 2. 这种方式不用处理可变剪接问题，但也不能发现新的转录本
 
 3. 了解到预测lncRNA可以把reads先比对到mRNA上，把剩下的未比对的重新做成fq文件，然后比对到基因组
+
+### 构建转录组索引
+```shell
+STAR --runThreadN 20 \
+--runMode genomeGenerate \
+--genomeDir ./ \
+--limitGenomeGenerateRAM=34000000000 \
+--genomeFastaFiles /data/FDY_analysis/Arabidposis_transcriptome/Araport11_genes.201606.cdna.fa
+```
+注：转录组索引不需要 gff 文件
