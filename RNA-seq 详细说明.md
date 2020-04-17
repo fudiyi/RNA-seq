@@ -132,7 +132,7 @@ https://www.jianshu.com/p/a63595a41bed
 **mulitiqc**： https://multiqc.info/
 
 ```shell
-fastqc /data/FDY_analysis/RNA_seq/FDY/mac3ab/rawdata/*.fastq.gz -o fastqc # *表示通配符，可对目录下所有.gz文件批量质控
+fastqc /data/FDY_analysis/RNA_seq/FDY/m/rawdata/*.fastq.gz -o fastqc # *表示通配符，可对目录下所有.gz文件批量质控
 或 ls *.gz | while read id ;do fastqc $id ;done # while read 一次读取一行
 multiqc *fastqc.zip --ignore *.html # 整合质控结果
 ```
@@ -178,8 +178,8 @@ hisat2-build -p 10 Zea_mays.AGPv4.dna.toplevel.fa genome #fa为基因组序列�
 初次进行比对时先尝试使用一组样本，再尝试批量比对
 
 ```shell
-wkpath1=/data/FDY_analysis/RNA_seq/FDY/mac3ab/rawdata/cleandata #设置工作路径
-wkpath2=/data/FDY_analysis/RNA_seq/FDY/mac3ab/rawdata/hisat2_results_for_cufflink
+wkpath1=/data/FDY_analysis/RNA_seq/FDY/m/rawdata/cleandata #设置工作路径
+wkpath2=/data/FDY_analysis/RNA_seq/FDY/m/rawdata/hisat2_results_for_cufflink
 for i in $(ls ${wkpath1}/*.R1.fastq.gz) # $(your command) 用法等于 `your command`
 do
     sample_name=`basename $i|sed s/.R1.*//g` #取文件名（sed 用于将 /.R1.*/ 前后的字符替换为空格）
@@ -228,8 +228,8 @@ STAR --runThreadN 20 \
 ```shell
 #!/usr/bin/env bash
 
-wkpath_rawdata=/data/FDY_analysis/RNA_seq/FDY/mac3ab/rawdata/cleandata
-wkpath_results=/data/FDY_analysis/RNA_seq/FDY/mac3ab/rawdata/STAR_TACO_featurecounts
+wkpath_rawdata=/data/FDY_analysis/RNA_seq/FDY/m/rawdata/cleandata
+wkpath_results=/data/FDY_analysis/RNA_seq/FDY/m/rawdata/STAR_TACO_featurecounts
 
 for i in $(ls ${wkpath_rawdata}/*.R1.fastq.gz|grep -E 'Col|S')
 do
@@ -254,7 +254,7 @@ done
 bam文件在导入IGV前需进行**排序及构建索引**
 
 ```shell
-workpath=/data/FDY_analysis/RNA_seq/FDY/mac3ab/rawdata/hisat2_results
+workpath=/data/FDY_analysis/RNA_seq/FDY/m/rawdata/hisat2_results
 for i in $(ls ${workpath}/*_all.hisat2.bam)
 do
     sample_name=`basename $i|sed s/_all.hisat2.bam//g`
@@ -331,7 +331,7 @@ $ rm a.rev*.bam
 **Versions before 2.2**
 
 ```shell
-workpath=/data/FDY_analysis/RNA_seq/FDY/mac3ab/rawdata/hisat2_results
+workpath=/data/FDY_analysis/RNA_seq/FDY/m/rawdata/hisat2_results
 env=/home/dell/anaconda2/bin/bamCoverage
 for j in $(ls ${workpath}/*.bam) 
 do
@@ -458,7 +458,7 @@ lts/assembly.gtf #This tool can take any assembly in GTF format and compare to a
 cuffdiff -o diffout_all -p 12 
 -b /data/FDY_analysis/Arabidposis_index_hisat2/Arabidopsis_TAIR10_gene_JYX.fa \
 --library-type fr-firststrand \ #若为链特异性数据需设定该参数
--L col-0,col-3,col-24,mac-0,mac-3,mac-24,skip-0,skip-3,skip-24 \
+-L col-0,col-3,col-24,m-0,m-3,m-24,s-0,s-3,s-24 \
 -u ./merged_asm/merged.gtf \
 Col-1-0_368368_all.hisat2.bam,Col-2-0_371371_all.hisat2.bam 
 Col-1-3_369369_all.hisat2.bam,Col-2-3_372372_all.hisat2.bam
@@ -622,7 +622,7 @@ URL: http://systemsbiology.cau.edu.cn/agriGOv2/
 
 ```R
 library(ggpubr) #载入包
-data_bar <- read.table("col_up_mac.txt",header = T)	#读入数据，有行名
+data_bar <- read.table("col_up_m.txt",header = T)	#读入数据，有行名
 data$Pathway <- factor(data$Pathway,levels =c("Molecular_Function","Biological_Process"))
 #改变横坐标因子顺序
 ggbarplot(data_bar,x="Name",y="Score",
@@ -670,8 +670,8 @@ awk '{if($3 == "u" || $3 == "i" || $3 == "x"){print $0}}' filter1.txt > filter2.
 
 **gffcompare**
 ```shell
-gffcompare -r /data/FDY_analysis/Ara_gff_file/TAIR10.GFF3.genes.gtf -o ./gffcompare/strtcmp ./stringtie_merged_skip.gtf
-awk '{if($3 == "u" || $3 == "i" || $3 == "x"){print $0}}' strtcmp.stringtie_merged_skip.gtf.tmap > filter1.txt 
+gffcompare -r /data/FDY_analysis/Ara_gff_file/TAIR10.GFF3.genes.gtf -o ./gffcompare/strtcmp ./stringtie_merged_s.gtf
+awk '{if($3 == "u" || $3 == "i" || $3 == "x"){print $0}}' strtcmp.stringtie_merged_s.gtf.tmap > filter1.txt 
 awk '{if($6 >1 && $10 > 200){print $0}}' filter1.txt > filter2.txt # 筛选exon大于1，length大于200的基因
 ```
 
@@ -733,7 +733,7 @@ done
 library(upsetR)
 data <- read.table("data_all.txt")
 between <- function(row, min, max){
-     newData <- (row["RI_in_mac"] < max) & (row["RI_in_m"] > min)
+     newData <- (row["RI_in_m"] < max) & (row["RI_in_m"] > min)
 }
 
 	upset(data_all_RI,sets=c("RI_0_3","SE_0_3","A3SS_0_3","A5SS_0_3","MXE_0_3","RI_3_24","SE_3_24","A3SS_3_24","A5SS_3_24","MXE_3_24","RI_0_24","SE_0_24","A3SS_0_24","A5SS_0_24","MXE_0_24"),order.by = "freq",keep.order = TRUE,mainbar.y.label = "Gene Intersections", sets.x.label = "Splicing Form", mb.ratio = c(0.6, 0.4), 
