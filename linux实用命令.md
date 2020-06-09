@@ -88,4 +88,14 @@ grep -v -w ABC file.txt # -w 即 word，按单个词匹配
 grep -B1 -w ABC file.txt # 会显示txt文件中匹配到ABC及其前一行内容
 ```
 
+#### 统计行列数
 
+```shell
+
+#统计行数
+
+wc -l file
+
+#统计列数
+
+cat file |head -n 1|awk '{print NF}'
