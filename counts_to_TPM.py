@@ -16,7 +16,7 @@ def get_RPKM():
 
         counts_sum_all['%s' % i] = data[i].sum() # 对各个样本的counts求和
 
-        sample_rpkm['%s' % i] = pd.Series((data[i]/(counts_sum_all[i]/10))/(data['len']/1000)) # 将样本的各个基因count除以10^6得到RPM,再将RPM除以基因长度
+        sample_rpkm['%s' % i] = pd.Series((data[i]/(counts_sum_all[i]/1000000))/(data['len']/1000)) # 将样本的各个基因count除以10^6得到RPM,再将RPM除以基因长度
 
     index = pd.Series(data['gene'])
 
@@ -39,7 +39,7 @@ def get_TPM():
 
         gene_scale = data[i]/(data['len']/1000)
 
-        sample_tpm['%s' % i] = gene_scale/(gene_scale.sum()/10)
+        sample_tpm['%s' % i] = gene_scale/(gene_scale.sum()/10000000)
 
     index = pd.Series(data['gene'])
 
