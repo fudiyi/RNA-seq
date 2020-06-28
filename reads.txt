@@ -1,0 +1,5 @@
+gene	len	sampleA	sampleB	sampleC	sampleD
+A	2000	10	12	30	20
+B	4000	20	25	60	10
+C	1000	5	8	15	0
+D	10000	0	0	1	2
