@@ -98,7 +98,7 @@ file_base1 <- paste(file_base, "results.xls", sep="_")
 write.table(as.data.frame(res), file=file_base1, sep="\t", quote=F, row.names=F)
 
 # 差异基因筛选，pvalue < 0.05
-res_de <- subset(res, res$pvalue<0.05, select=c('ID', sampleA, sampleB, 'log2FoldChange', ,'pvalue','padj'))
+res_de <- subset(res, res$pvalue<0.05, select=c('ID', sampleA, sampleB, 'log2FoldChange','pvalue','padj'))
 # foldchange > 2
 # 因为 sampleA 是未处理，所以是下调基因
 res_de_up <- subset(res_de, res_de$log2FoldChange>=1)
