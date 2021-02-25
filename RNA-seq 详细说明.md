@@ -718,6 +718,16 @@ python /data/FDY_analysis/tools/CNCI-master/CNCI.py \
 
 reference： http://rnaseq-mats.sourceforge.net/
 
+#### 安装
+
+```shell
+conda create --name py2 python=2.7 #创建一个python2的环境
+conda activate py2 
+conda install -c bioconda rmats
+```
+注：安装完成后的 rmat.py 文件在 conda 的环境目录下
+
+
 ```shell
 for i in {0,3,24}
 do
