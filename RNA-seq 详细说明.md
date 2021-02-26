@@ -753,7 +753,7 @@ python rmats.py --b1 /path/to/b1.txt --b2 /path/to/b2.txt \
 
 summary.txt: Brief summary of all AS event types. Includes the total event counts and significant event counts. By default, **events are counted as significant if FDR <= 0.05**. The summary can be regenerated with different criteria by running rMATS_P/summary.py
 
-如上：官方给的 summary.txt 对可变剪接事件的筛选阈值是 FDR <= 0.05
+如上：官方给的 summary.txt 对可变剪接事件的筛选阈值是 **FDR <= 0.05**
 
 使用参数如下：
 
@@ -788,12 +788,12 @@ optional arguments:
                         write to
 ```
 
-若阈值使用 P<=0.05，参数如下：
+若阈值使用 **P<=0.05**，参数如下：
 
 ```shell
 python /home/dell/miniconda3/envs/python2/rMATS/rMATS_P/summary.py --use-raw-p --p-cutoff 0.05 \
 --summary-prefix /data/FDY_analysis/RNA_seq/FDY/m/rawdata/AS_analysis/rmats/summary/ \
-/data/FDY_analysis/RNA_seq/FDY/mac3ab/rawdata/AS_analysis/rmats/col_0_3
+/data/FDY_analysis/RNA_seq/FDY/m/rawdata/AS_analysis/rmats/col_0_3
 ```
 
 
