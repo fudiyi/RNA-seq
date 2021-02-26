@@ -747,8 +747,55 @@ python rmats.py --b1 /path/to/b1.txt --b2 /path/to/b2.txt \
 	--od /path/to/output --tmp /path/to/tmp_output \
 	--cstat 0.01 \
 	--libType fr-unstranded \ #需注意是否为链特异性数据
-	--paired-stats #若b1和b2为分组比较，需加上此参数
 ```
+
+**对 alternative splicing event type 进行统计**
+
+summary.txt: Brief summary of all AS event types. Includes the total event counts and significant event counts. By default, **events are counted as significant if FDR <= 0.05**. The summary can be regenerated with different criteria by running rMATS_P/summary.py
+
+如上：官方给的 summary.txt 对可变剪接事件的筛选阈值是 FDR <= 0.05
+
+使用参数如下：
+
+```shell
+usage: summary.py [-h] [--use-raw-p] [--p-cutoff P_CUTOFF]
+                  [--inc-level-diff-cutoff INC_LEVEL_DIFF_CUTOFF]
+                  [--summary-path SUMMARY_PATH | --summary-prefix SUMMARY_PREFIX]
+                  output_dir
+
+summarize the rMATS results from the output files
+
+positional arguments:
+  output_dir            path to the directory containing rMATS output
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --use-raw-p           check --p-cutoff against the raw PValue instead of
+                        against FDR
+  --p-cutoff P_CUTOFF   cutoff value used for FDR (or PValue for --use-raw-p)
+                        for determining significance. Default: 0.05
+  --inc-level-diff-cutoff INC_LEVEL_DIFF_CUTOFF
+                        cutoff value used for the absolute value of
+                        IncLevelDifference for determining significance.
+                        Default: 0
+  --summary-path SUMMARY_PATH
+                        path to write the generated summary to instead of
+                        stdout
+  --summary-prefix SUMMARY_PREFIX
+                        prefix of path to write the generated summary to
+                        instead of stdout. The cutoff values and ".txt" will
+                        be appended to the prefix to obtain the actual path to
+                        write to
+```
+
+若阈值使用 P<=0.05，参数如下：
+
+```shell
+python /home/dell/miniconda3/envs/python2/rMATS/rMATS_P/summary.py --use-raw-p --p-cutoff 0.05 \
+--summary-prefix /data/FDY_analysis/RNA_seq/FDY/m/rawdata/AS_analysis/rmats/summary/ \
+/data/FDY_analysis/RNA_seq/FDY/mac3ab/rawdata/AS_analysis/rmats/col_0_3
+```
+
 
 **对可变剪接结果可视化：**
 
