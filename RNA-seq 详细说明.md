@@ -714,7 +714,7 @@ python /data/FDY_analysis/tools/CNCI-master/CNCI.py \
 
 **什么是可变剪接**：https://www.jianshu.com/p/759a5a714aa3
 
-### rMATS（需要有重复）
+### rMATS
 
 reference： http://rnaseq-mats.sourceforge.net/
 
@@ -728,13 +728,18 @@ conda install -c bioconda rmats
 注：安装完成后的 rmat.py 文件在 conda 的环境目录下
 
 
+#### 使用
+
+**以下情况为：使用bam文件，并进行两个组之间的比较**
+
 ```shell
-for i in {0,3,24}
-do
-	python2.7 /data/FDY_analysis/tools/rMATS.4.0.2/rMATS-turbo-Linux-UCS4/rmats.py --b1 col_${i}.txt --b2 m_${i}.txt --gtf /data/FDY_analysis/RNA_seq/FDY/m/rawdata/hisat2_results_for_cufflink/results_bam/merged_asm/merged.gtf --od rMATs/col_m_${i} -t paired --readLength 150 --cstat 0.01 --nthread 8 --libType fr-firststrand
-	python2.7 /data/FDY_analysis/tools/rMATS.4.0.2/rMATS-turbo-Linux-UCS4/rmats.py --b1 col_${i}.txt --b2 s_${i}.txt --gtf /data/FDY_analy
-sis/RNA_seq/FDY/m/rawdata/hisat2_results_for_cufflink/results_bam/merged_asm/merged.gtf --od rMATs/col_s_${i} -t paired --readLength 150 --cstat 0.01 --nthread 8 --libType fr-firststrand
-done
+python rmats.py --b1 /path/to/b1.txt --b2 /path/to/b2.txt \
+	--gtf /path/to/the.gtf \
+	-t paired --readLength 150 --nthread 4 \
+	--od /path/to/output --tmp /path/to/tmp_output \
+	--cstat 0.01 \
+	--libType fr-unstranded \ #需注意是否为链特异性数据
+	--paired-stats #若b1和b2为分组比较，需加上此参数
 ```
 
 **对可变剪接结果可视化：**
