@@ -515,6 +515,14 @@ python prepDE.py 会产生两个文件：gene/transcript_count_matrix.csv
 
 3. https://hbctraining.github.io/DGE_workshop/lessons/02_DGE_count_normalization.html （推荐看这个）
 
+
+**关于批次效应**
+
+生信宝典总结的很到位！归纳起来就是：如果**差异分析时用到的数据不是同一批测得**，那就需要考虑是否有批次问题！
+
+https://mp.weixin.qq.com/s?__biz=MzI5MTcwNjA4NQ==&mid=2247495826&idx=1&sn=0680ccf4139eba1d79e736826c91bde1&chksm=ec0e3518db79bc0e8ff17f109f636015f68f9df1280e3cdaca32044fd2671edc95c3f33c2d48&scene=178&cur_album_id=1335351932285976579#rd
+
+
 ### 8.1	挑选差异基因
 
 若是cuffdiff结果，直接用 **gene.exp.diff** 文件筛选差异基因；若是stringtie/featurecounts结果，使用 **DESeq2**
