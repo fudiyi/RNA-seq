@@ -4,38 +4,41 @@
 rm(list = ls())
 options(stringsAsFactors = F)
 
-################  1.ÔØÈëR°ü  ######### 
+################  1.è½½å…¥RåŒ…  ######### 
 
 library(DESeq2)
 
-################  2.¶ÁÈë featurecounts ½á¹ûÎÄ¼ş  #################
+################  2.è¯»å…¥ featurecounts ç»“æœæ–‡ä»¶  #################
 
-setwd("E:/×ªÂ¼×é/RNA-Seq/DEseq2_test") #ÉèÖÃÎÄ¼şËù·ÅÄ¿Â¼
+setwd("E:/è½¬å½•ç»„/RNA-Seq/DEseq2_test") #è®¾ç½®æ–‡ä»¶æ‰€æ”¾ç›®å½•
 countData_raw <- read.table("all_counts.txt",row.names = 1,header = T)
-countData1 = countData_raw[,-c(1,2,3,4)] #È¥³ı²»ĞèÒªµÄÁĞ
+countData1 = countData_raw[,-c(1,2,3,4)] #å»é™¤ä¸éœ€è¦çš„åˆ—
 
-################  3.È¥³ıµôÑù±¾×ÜºÍ count<2 µÄÖµ  ####################
+################  3.å»é™¤æ‰æ ·æœ¬æ€»å’Œ count<2 çš„å€¼  ####################
 
-countData1 <- countData1[rowSums(countData1[,2:ncol(countData1)])>2,] #È¥³ıµôÑù±¾×ÜºÍ count<2 µÄÖµ
+countData1 <- countData1[rowSums(countData1[,2:ncol(countData1)])>2,] #å»é™¤æ‰æ ·æœ¬æ€»å’Œ count<2 çš„å€¼
 
-###############  4.¹¹½¨Ñù±¾ĞÅÏ¢¾ØÕó  #############
-colnames(countData1) #²é¿´ÁĞÃû
-condition <- factor(c(rep("WT",3), rep("treat1",3),rep("treat2",3))) #ÉèÖÃÑù±¾¶ÔÓ¦µÄÌõ¼ş
+###############  4.æ„å»ºæ ·æœ¬ä¿¡æ¯çŸ©é˜µ  #############
+colnames(countData1) #æŸ¥çœ‹åˆ—å
+condition <- factor(c(rep("WT",3), rep("treat1",3),rep("treat2",3))) #è®¾ç½®æ ·æœ¬å¯¹åº”çš„æ¡ä»¶
 colData <- data.frame(row.names=colnames(countData1[,2:ncol(countData1)]), condition)
-all(rownames(colData) %in% colnames(countData1)) #ÅĞ¶ÏÃû×ÖÊÇ·ñÒ»ÖÂ
+all(rownames(colData) %in% colnames(countData1)) #åˆ¤æ–­åå­—æ˜¯å¦ä¸€è‡´
 
+# æ³¨ï¼šå¦‚æœ countData_raw æ–‡ä»¶ä¸­åˆ—åä¸ºéå›ºå®šå½¢å¼ï¼Œä½¿ç”¨ä»¥ä¸‹è„šæœ¬é‡å‘½åä¸ºå¯¹åº”çš„æ ·æœ¬åå³å¯ï¼ˆå°†23è¡Œä»£ç ä¿®æ”¹æˆä»¥ä¸‹ä¸¤å¥å‘½ä»¤ï¼‰
+# colnames(countData1) <- c("Length","CK-1-0","CK-1-24","CK-1-9","CK-2-0","CK-2-24","CK-2-9","CK-3-0","CK-3-24","CK-3-9")
+# condition <- factor(c("CK-0","CK-24","CK-9","CK-0","CK-24","CK-9","CK-0","CK-24","CK-9"))
 
-###############  5.»ñÈ¡±í´ï¾ØÕó  ###############
-countData2 <- countData1[, rownames(colData)] #±í´ï¾ØÕó²»ĞèÒªLength´ËÁĞ
+###############  5.è·å–è¡¨è¾¾çŸ©é˜µ  ###############
+countData2 <- countData1[, rownames(colData)] #è¡¨è¾¾çŸ©é˜µä¸éœ€è¦Lengthæ­¤åˆ—
 all(rownames(colData) == colnames(countData2))
 
-###############  6.¹¹½¨dds¾ØÕó  ####################
+###############  6.æ„å»ºddsçŸ©é˜µ  ####################
 
 dds <- DESeqDataSetFromMatrix(countData2, colData, design= ~ condition) 
 
-############### 7.PCA·ÖÎö ####################
+############### 7.PCAåˆ†æ ####################
 
-dds_pca <- estimateSizeFactors(dds) #¼ÆËãÃ¿¸öÑù±¾µÄ¹éÒ»»¯ÏµÊı
+dds_pca <- estimateSizeFactors(dds) #è®¡ç®—æ¯ä¸ªæ ·æœ¬çš„å½’ä¸€åŒ–ç³»æ•°
 raw <- SummarizedExperiment(counts(dds_pca, normalized=FALSE),
                             colData=colData(dds_pca))
 nor <- SummarizedExperiment(counts(dds_pca, normalized=TRUE),
@@ -50,24 +53,24 @@ plotPCA(rld, intgroup=c("condition"))
 dev.off()
 
 
-################ 8.ÀûÓÃDESeqº¯Êı±ê×¼»¯dds¾ØÕó ################
+################ 8.åˆ©ç”¨DESeqå‡½æ•°æ ‡å‡†åŒ–ddsçŸ©é˜µ ################
 
 dds_DEG <- DESeq(dds)
 
-################   9.»ñÈ¡±ê×¼»¯µÄ counts ¼° TPM  ################
+################   9.è·å–æ ‡å‡†åŒ–çš„ counts åŠ TPM  ################
 
-#»ñÈ¡ normalized_counts
+#è·å– normalized_counts
 normalized_counts <- as.data.frame(counts(dds_DEG, normalized=TRUE))
 write.csv(normalized_counts, file="normalized.csv")
 
-#»ñÈ¡ TPM 
+#è·å– TPM 
 kb <- countData1$Length / 1000
 counts_data <- countData1[,2:ncol(countData1)]
 rpk <- counts_data / kb
 tpm <- t(t(rpk)/colSums(rpk) * 1000000)
 write.csv(tpm,file = "tpm_results.csv", quote=F, row.names=T)
 
-#################  10.²îÒì·ÖÎö  #############
+#################  10.å·®å¼‚åˆ†æ  #############
 
 Get_DEG <- function(untreated,treated){
   
